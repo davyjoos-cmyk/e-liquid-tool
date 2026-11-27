@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>E-Liquid Lab v3</title>
+<style>
+:root{--pk:#f472b6;--tl:#2dd4bf;--bg:#070b16;--card:rgba(30,41,59,.62);--bd:rgba(148,163,184,.16);--ac:#22d3ee;--pu:#c084fc;--am:#fbbf24;--ok:#34d399;--no:#fb7185;--tx:#f1f5f9;--mu:#8b9ab3;--in:rgba(2,6,16,.55)}
+[data-theme=light]{--bg:#eef2f9;--card:rgba(255,255,255,.75);--bd:rgba(15,23,42,.1);--ac:#0891b2;--pu:#9333ea;--am:#d97706;--ok:#059669;--no:#e11d48;--tx:#0f172a;--mu:#5b6b84;--in:rgba(255,255,255,.8)}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{background:var(--bg);color:var(--tx);min-height:100vh;padding:12px 12px 92px;display:flex;justify-content:center;position:relative;overflow-x:hidden}
+body:before,body:after{content:"";position:fixed;width:420px;height:420px;border-radius:50%;filter:blur(90px);opacity:.28;z-index:-1;animation:fl 14s ease-in-out infinite alternate}
+body:before{background:var(--ac);top:-120px;left:-120px}body:after{background:var(--pu);bottom:-140px;right:-120px;animation-delay:-7s}
+@keyframes fl{to{transform:translate(60px,50px) scale(1.15)}}
+.app{width:100%;max-width:620px;display:flex;flex-direction:column;gap:14px}
+.card,header{background:var(--card);border:1px solid var(--bd);border-radius:18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 30px rgba(0,0,0,.18)}
+header{padding:14px 16px;display:flex;align-items:center;gap:12px}
+.logo{background:linear-gradient(135deg,var(--ac),var(--pu));width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:22px;box-shadow:0 6px 20px rgba(34,211,238,.35)}
+.bt{font-size:1.15rem;font-weight:800;background:linear-gradient(90deg,var(--ac),var(--pu));-webkit-background-clip:text;background-clip:text;color:transparent}
+.bs{font-size:.72rem;color:var(--mu)}
+#th{margin-left:auto;background:var(--in);border:1px solid var(--bd);border-radius:12px;width:40px;height:40px;cursor:pointer;font-size:18px}
+nav{position:fixed;bottom:max(10px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(596px,calc(100% - 20px));display:flex;gap:2px;padding:6px;background:var(--card);border:1px solid var(--bd);border-radius:22px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 10px 40px rgba(0,0,0,.35);z-index:5;overflow-x:auto}
+nav button{flex:1;min-width:58px;padding:7px 2px;background:none;border:0;color:var(--mu);font-size:.62rem;font-weight:600;border-radius:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;transition:.2s}
+nav button i{font-style:normal;font-size:1.15rem}
+nav button.on{background:linear-gradient(135deg,var(--ac),var(--pu));color:#fff;box-shadow:0 4px 14px rgba(34,211,238,.35)}
+.pane{display:none;flex-direction:column;gap:14px}.pane.on{display:flex;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+.card{padding:16px}
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+.ct{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--ac)}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+label{font-size:.72rem;color:var(--mu);font-weight:600}
+input,select{width:100%;background:var(--in);border:1px solid var(--bd);color:var(--tx);padding:10px 12px;border-radius:12px;font-size:.92rem;outline:0;transition:.2s}
+input:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(34,211,238,.18)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{background:var(--in);border:1px solid var(--bd);color:var(--mu);border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:700;cursor:pointer}
+.chip.on,.chip:hover{border-color:var(--ac);color:var(--ac)}
+.tg{display:flex;background:var(--in);border:1px solid var(--bd);border-radius:12px;padding:3px;gap:3px;margin:4px 0 10px}
+.tg button{flex:1;padding:8px;background:none;border:0;color:var(--mu);font-size:.78rem;font-weight:700;border-radius:9px;cursor:pointer}
+.tg button.fb{background:rgba(34,211,238,.18);color:var(--ac)}.tg button.salt{background:rgba(192,132,252,.2);color:var(--pu)}
+.fr{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.fr input:first-child{flex:2}.fr input[type=number]{flex:1;text-align:center;font-weight:700;color:var(--am)}
+.x{background:rgba(251,113,133,.13);color:var(--no);border:1px solid rgba(251,113,133,.3);border-radius:10px;width:36px;height:36px;cursor:pointer;font-weight:700;flex-shrink:0}
+.b1,.b2{border-radius:12px;padding:11px 12px;font-size:.76rem;font-weight:800;cursor:pointer;width:100%;text-transform:uppercase;letter-spacing:.6px;transition:.2s}
+.b1{background:linear-gradient(135deg,var(--ac),var(--pu));color:#fff;border:0;box-shadow:0 6px 18px rgba(34,211,238,.28)}
+.b1:active,.b2:active{transform:scale(.97)}
+.b2{background:var(--in);color:var(--ac);border:1px solid var(--bd)}
+.sm{width:auto;padding:6px 11px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.st{background:var(--in);border:1px solid var(--bd);border-radius:14px;padding:10px 4px;text-align:center}
+.st b{display:block;font-size:1rem;font-weight:800}.st span{font-size:.6rem;color:var(--mu);text-transform:uppercase;letter-spacing:.5px}
+.bar{display:flex;height:16px;border-radius:10px;overflow:hidden;background:var(--in);margin-bottom:8px}
+.bar div{transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.68rem;color:var(--mu);margin-bottom:12px}
+.leg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px}
+.rc{background:var(--in);border:1px solid var(--bd);border-radius:14px;padding:6px 12px}
+.rr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--bd);font-size:.84rem}
+.rr:last-child{border:0}.rv{font-family:ui-monospace,monospace;font-weight:700;white-space:nowrap}
+.it{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--in);border:1px solid var(--bd);border-radius:14px;padding:11px 12px;margin-bottom:8px}
+.sub{font-size:.7rem;color:var(--mu);margin-top:2px}
+.bg{font-size:.65rem;padding:3px 8px;border-radius:20px;font-weight:700;display:inline-block;margin-top:4px}
+.bw{background:rgba(251,113,133,.14);color:var(--no)}.bk{background:rgba(52,211,153,.14);color:var(--ok)}.ba{background:rgba(251,191,36,.15);color:var(--am)}
+.warn{display:flex;flex-direction:column;gap:6px;margin-top:10px}.warn div{font-size:.74rem;padding:8px 10px;border-radius:10px;background:rgba(251,191,36,.12);color:var(--am);border:1px solid rgba(251,191,36,.25)}
+.warn div.e{background:rgba(251,113,133,.12);color:var(--no);border-color:rgba(251,113,133,.3)}
+.warn div.i{background:rgba(34,211,238,.1);color:var(--ac);border-color:rgba(34,211,238,.25)}.rr.dn{opacity:.4;text-decoration:line-through}#ac{position:fixed;z-index:20;display:none;background:var(--bg);border:1px solid var(--ac);border-radius:14px;max-height:240px;overflow:auto;box-shadow:0 14px 40px rgba(0,0,0,.5)}
+#ac div{padding:10px 12px;font-size:.84rem;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center}
+#ac div.on{background:rgba(34,211,238,.18)}#ac small{color:var(--mu);font-size:.68rem;white-space:nowrap}
+.pane.on>.card{animation:in .45s both}.pane.on>.card:nth-child(2){animation-delay:.06s}.pane.on>.card:nth-child(3){animation-delay:.12s}.pane.on>.card:nth-child(4){animation-delay:.18s}
+.card{transition:border-color .25s,transform .25s}.card:hover{border-color:rgba(34,211,238,.4)}
+.b1:hover{box-shadow:0 8px 26px rgba(192,132,252,.45);transform:translateY(-1px)}.logo{animation:pulse 3s ease-in-out infinite}@keyframes pulse{50%{box-shadow:0 6px 30px rgba(192,132,252,.6)}}
+input[type=range]{accent-color:var(--ac);cursor:pointer}
+textarea{width:100%;background:var(--in);border:1px solid var(--bd);color:var(--tx);border-radius:12px;padding:10px;font-size:.85rem;outline:0;font-family:inherit}#pa{display:none}@media print{body>*:not(#pa){display:none!important}#pa{display:block!important}html,body{padding:0!important;margin:0!important;background:#fff!important}}
+@media (pointer:coarse){input,select,textarea{font-size:16px}}body{-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}html{padding-top:env(safe-area-inset-top,0px)}#toast.on{z-index:120}#cf{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:110}
+.ov{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;gap:12px;padding:max(14px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));background:radial-gradient(900px 500px at 20% -10%,rgba(34,211,238,.22),transparent),radial-gradient(700px 500px at 100% 100%,rgba(192,132,252,.22),transparent),var(--bg);user-select:none;-webkit-user-select:none}.ov.on{display:flex}
+#labBody{display:flex;flex-direction:column;gap:14px;flex:1;min-height:0;max-width:560px;width:100%;margin:0 auto}
+.lhd{display:flex;align-items:center;justify-content:space-between;gap:10px}.lhd b{font-size:.95rem}.lu{margin:0;width:150px}
+.lseg{display:flex;gap:4px}.lseg i{flex:1;height:6px;border-radius:4px;background:var(--bd);transition:.3s}.lseg i.d{background:var(--c,var(--ok))}.lseg i.c{background:var(--c,var(--ac));box-shadow:0 0 12px var(--c,var(--ac))}
+#labBot{display:flex;justify-content:center;flex:0 0 auto}.pv{animation:pv 1.1s ease-in-out infinite alternate}@keyframes pv{from{opacity:.18}to{opacity:.6}}
+.lname{text-align:center;font-size:1.35rem;font-weight:800;word-break:break-word}
+.lbig{text-align:center;font-size:clamp(3.6rem,19vw,6.4rem);font-weight:900;line-height:1;font-variant-numeric:tabular-nums;background:linear-gradient(90deg,var(--ac),var(--pu));-webkit-background-clip:text;background-clip:text;color:transparent}.lbig small{font-size:.35em;margin-left:.2em;-webkit-text-fill-color:var(--mu)}
+.lsub{display:flex;flex-direction:column;align-items:center;gap:6px}.pill{background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.4);color:var(--ok);border-radius:30px;padding:8px 16px;font-size:1rem}
+.lnav{margin-top:auto;display:grid;grid-template-columns:1fr 1.4fr;gap:12px}.lnav button{min-height:60px;font-size:.95rem}.lnav button:disabled{opacity:.35}
+.ring2{width:130px;height:130px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--ok) 0%,var(--bd) 0);margin:0 auto 12px}.ring2 span{width:104px;height:104px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:2.4rem;font-weight:900}
+.wseg{display:flex;gap:4px;max-width:520px;width:100%;margin:0 auto}.wseg i{flex:1;height:4px;border-radius:3px;background:rgba(148,163,184,.3);overflow:hidden;position:relative}.wseg i b{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--tx)}.wseg i.d b{width:100%}.wseg i.c b{animation:wseg 6s linear forwards}@keyframes wseg{to{width:100%}}
+.wst{flex:1;min-height:0;position:relative;max-width:520px;width:100%;margin:0 auto;cursor:pointer}.wst canvas{width:100%;height:100%;object-fit:contain;border-radius:18px}
+.wbt{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:520px;width:100%;margin:0 auto}.wclose{position:absolute;right:16px;top:max(26px,calc(env(safe-area-inset-top) + 22px));z-index:2}
+#badges{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.bd{background:var(--in);border:1px solid var(--bd);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:4px;opacity:.6}.bd.ok{opacity:1;border-color:rgba(251,191,36,.5);box-shadow:0 0 18px rgba(251,191,36,.12)}
+.bd .bi{font-size:1.7rem}.bd b{font-size:.82rem}.bd span{font-size:.68rem;color:var(--mu)}.bd em{font-size:.66rem;color:var(--am);font-style:normal}.bp{height:5px;border-radius:3px;background:var(--bd);overflow:hidden}.bp i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--pu))}
+.mt{height:6px;border-radius:4px;background:var(--bd);overflow:hidden;margin-top:6px}.mt i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--pu))}
+.note{font-size:.76rem;color:var(--mu);margin-bottom:10px}
+.ring{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;font-size:.62rem;font-weight:800}
+.ring span{background:var(--card);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;backdrop-filter:blur(4px)}
+#toast{position:fixed;bottom:96px;left:50%;transform:translate(-50%,10px);background:var(--card);backdrop-filter:blur(14px);border:1px solid var(--ac);padding:10px 16px;border-radius:14px;font-size:.8rem;opacity:0;pointer-events:none;transition:.25s;z-index:9;max-width:90%}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+
+</head>
+<body>
+<div class="app">
+<header><div class="logo">🧪</div><div><div class="bt">E-LIQUID LAB</div><div class="bs">Master Edition v4.0</div></div><button id="th" onclick="toggleTheme()">🌙</button><button id="inst" class="b2 sm" onclick="doInstall()" style="display:none;margin-left:8px">📲 Installeer</button></header>
+
+<div id="tab-calc" class="pane on">
+ <div class="card">
+  <div class="ch"><span class="ct">Recept</span></div>
+  <div class="fg"><label>Naam</label><input id="recipeName" value="Vanilla Strawberry Custard" autocomplete="off"></div><div class="chips" id="recent"></div>
+  <label>Snelle batchgrootte</label>
+  <div class="chips" id="mlChips"></div>
+  <div class="g3">
+   <div class="fg"><label>Inhoud (ml)</label><input type="number" id="targetMl" value="60" min="1"></div>
+   <div class="fg"><label>Nicotine (mg)</label><input type="number" id="targetNic" value="3" min="0" step="0.5"></div>
+   <div class="fg"><label>Doel VG %</label><input type="number" id="targetVg" value="70" min="0" max="100"></div>
+  </div>
+  <input type="range" id="vgSlider" min="0" max="100" value="70" oninput="$('targetVg').value=this.value;calculate()" style="margin:0 0 12px;padding:0;height:22px"><div class="tg"><button id="btn-fb" class="fb" onclick="setNicType('freebase')">Freebase</button><button id="btn-salt" onclick="setNicType('salts')">Nic Salt</button></div>
+  <div class="g2">
+   <div class="fg"><label>Nic shot (mg/ml)</label><input type="number" id="nicBaseMg" value="20" min="1"></div>
+   <div class="fg"><label>Nic shot VG %</label><input type="number" id="nicBaseVg" value="50" min="0" max="100"></div>
+  </div>
+  <div class="g2"><div class="fg"><label>Nicotine uit voorraad</label><select id="nicSel" onchange="pickNic()"></select></div><div class="fg"><label>Voorgemengde VG/PG base</label><select id="mixSel" onchange="calculate()"></select></div></div>
+  <button class="b2" onclick="roundShots()">🎯 Rond af op volle 10ml shots</button>
+ </div>
+ <div class="card">
+  <div class="ch"><span class="ct">Aroma's</span><button class="b2 sm" onclick="addFlavor()">+ Aroma</button></div>
+  <div id="flavors"></div>
+ </div><div class="card"><div class="ch"><span class="ct">🧭 Smaakradar</span><b id="radTy" style="font-size:.8rem;color:var(--am)"></b></div><div id="radar"></div><div class="note" id="radNote" style="text-align:center;margin:6px 0 0"></div></div><div class="card"><div class="ch"><span class="ct">🎯 DTL → MTL</span></div><div id="mtl"></div></div><div class="card"><div class="ch"><span class="ct">🍶 Gemengde liquids</span><button class="b2 sm" onclick="addBlend()">+ Liquid</button></div><div id="blend"></div><p class="note" style="margin:0">Gebruik bestaande liquids als ingrediënt. Hun nicotine, VG/PG en aroma's worden meegerekend. De aroma's hierboven zijn extra toevoegingen.</p></div>
+ <div class="card">
+  <div class="ch"><span class="ct">Menginstructies</span><b id="ratio" class="sub"></b></div><div class="tg"><button id="m-ml" class="fb" onclick="setMode('ml')">💧 Volume</button><button id="m-g" onclick="setMode('g')">⚖️ Gewicht</button></div>
+  <div class="stats"><div class="st"><b id="sNic">0</b><span>mg nic</span></div><div class="st"><b id="sFl">0%</b><span>aroma</span></div><div class="st"><b id="sCost">€0</b><span>totaal</span></div><div class="st"><b id="sMl">€0</b><span>per ml</span></div></div>
+  <div id="bottle" style="display:flex;justify-content:center;margin-bottom:10px"></div><div class="bar" id="bar"></div><div class="leg" id="leg"></div>
+  <div class="rc" id="res"></div>
+  <div class="warn" id="calcWarn"></div><div class="note" id="maxB" style="margin-top:10px"></div><div class="note" id="afterMix"></div>
+  <button class="b1" style="margin-top:14px;background:linear-gradient(135deg,#34d399,#22d3ee)" onclick="labStart()">🧑‍🔬 Start lab-modus</button><div class="g2" style="margin-top:10px"><button class="b2" onclick="saveRecipe()">💾 Opslaan</button><button class="b2" onclick="copySheet()">📋 Kopieer mixlijst</button></div>
+  <button class="b1" style="margin-top:10px" onclick="deductInventory()">📉 Mix &amp; trek voorraad af</button>
+ </div>
+</div>
+
+<div id="tab-dash" class="pane">
+ <div class="card"><div class="ch"><span class="ct">📊 Dashboard</span></div><div class="stats" id="dStats"></div><label>Gemixt per maand (ml)</label><div id="dChart"></div></div>
+ <div class="card"><div class="ch"><span class="ct">🔔 Aandachtspunten</span></div><div id="dAlerts"></div></div>
+ <div class="card"><div class="ch"><span class="ct">🎁 Lab Wrapped</span></div><p class="note">Je overzicht als story: batches, volume, trouwste aroma, smaakpersoonlijkheid, besparing, drukste maand en beste batch. Deelbaar als afbeelding van 1080 × 1920.</p><button class="b1" onclick="wrOpenUI()">🎁 Open Lab Wrapped</button></div><div class="card"><div class="ch"><span class="ct">🏆 Prestaties</span><span id="badgeCount" class="sub"></span></div><div id="badges"></div></div><div class="card"><div class="ch"><span class="ct">⏳ Hoelang reikt je voorraad</span></div><div class="fg"><label>Je verbruik (ml per dag)</label><input type="number" id="pDay" step="0.5" min="0" oninput="savePrice()"></div><div id="dRun" class="note"></div></div>
+<div class="card"><div class="ch"><span class="ct">💰 Besparing</span></div><div class="fg"><label>Winkelprijs kant-en-klaar (€ per 10 ml)</label><input type="number" id="pShop" step="0.5" min="0" oninput="savePrice()"></div><div id="dSave" class="note"></div></div>
+</div>
+<div id="tab-suggest" class="pane"><div class="card"><div class="ch"><span class="ct">🎲 Verras me</span></div><p class="note">Een willekeurig experiment-recept uit je eigen aromavoorraad, met aanbevolen percentages. Smaakcombinaties zijn niet gegarandeerd lekker: laat het steepen en proef.</p><button class="b1" onclick="surprise()">🎲 Verras me</button><div id="surpr" style="margin-top:12px"></div></div><div class="card"><div class="ch"><span class="ct">🤝 Smaakmatcher</span></div><p class="note">Aroma's uit je eigen voorraad die passen bij het recept in de calculator. Het matchpercentage is een indicatie op basis van smaakcategorieën, geen garantie.</p><div id="matcher"></div></div>
+<div class="card"><div class="ch"><span class="ct">💡 Suggesties</span></div><p class="note">Recepten die je met je voorraad kunt maken:</p><div id="suggestions"></div></div></div>
+
+<div id="tab-saved" class="pane"><div class="card">
+ <div class="ch"><span class="ct">📖 Mijn recepten</span><span id="savedCount" class="sub"></span></div>
+ <input id="q" placeholder="🔍 Zoek recept of aroma..." style="margin-bottom:12px"><div id="saved"></div>
+</div><div class="card"><div class="ch"><span class="ct">🔗 Deelcode</span></div><p class="note">Kies 📤 bij een recept om een code te maken, of plak hier een code van iemand anders en importeer hem.</p><textarea id="shareCode" rows="3" placeholder="ELAB1:..." style="width:100%;background:var(--in);border:1px solid var(--bd);color:var(--tx);border-radius:12px;padding:10px;font-size:.78rem;outline:0"></textarea><div class="g2" style="margin-top:10px"><button class="b2" onclick="importCode()">📥 Importeer</button><button class="b2" onclick="copyCode()">📋 Kopieer</button></div></div><div class="card"><div class="ch"><span class="ct">⚖️ Vergelijk recepten</span></div><div class="g2"><div class="fg"><label>Recept A</label><select id="cmpA" onchange="renderCmp()"></select></div><div class="fg"><label>Recept B</label><select id="cmpB" onchange="renderCmp()"></select></div></div><div id="cmpOut"></div></div>
+</div>
+
+<div id="tab-liq" class="pane">
+ <div class="card"><div class="ch"><span class="ct">🍶 Liquid in database</span><button class="b2 sm" onclick="liqFromRecipe()">📥 Van huidig recept</button></div>
+  <div class="fg"><label>Naam</label><input id="lName2" placeholder="bijv. Strawberry Custard batch 12"></div>
+  <div class="g3"><div class="fg"><label>Volume (ml)</label><input type="number" id="lMl" min="0"></div><div class="fg"><label>Nicotine (mg/ml)</label><input type="number" id="lNic" min="0" step="0.5" value="0"></div><div class="fg"><label>VG %</label><input type="number" id="lVg" min="0" max="100" value="70"></div></div>
+  <div class="tg"><button id="lnf" class="fb" onclick="lSetNt('freebase')">Freebase</button><button id="lns" onclick="lSetNt('salts')">Nic Salt</button></div>
+  <div class="fg"><label>Aroma's (één per regel: naam, %)</label><textarea id="lFl" rows="4" placeholder="Capella - Sweet Strawberry, 6&#10;TPA - Bavarian Cream, 3"></textarea></div>
+  <div class="fg"><label>Notities</label><input id="lNote" placeholder="smaakervaring, steeptijd, ..."></div>
+  <button class="b1" id="lAdd" onclick="addLiquid()">+ Toevoegen aan database</button></div>
+ <div class="card"><div class="ch"><span class="ct">Mijn liquids</span><span id="liqCount" class="sub"></span></div><input id="lq" placeholder="🔍 Zoek op naam of aroma..." style="margin-bottom:12px" oninput="renderLiquids()"><div id="liqs"></div></div>
+</div>
+<div id="tab-fles" class="pane">
+ <div class="card"><div class="ch"><span class="ct">📏 Flesje opmeten</span></div>
+  <div class="g2"><div class="fg"><label>Opgeslagen flesje</label><select id="fPre" onchange="fLoad()"></select></div><div class="fg"><label>Naam (om op te slaan)</label><input id="fName" placeholder="bijv. Unicorn 60 ml"></div></div>
+  <div class="g2" style="margin-bottom:12px"><button class="b2" onclick="fSave()">💾 Flesje opslaan</button><button class="b2" onclick="fDel()">🗑️ Verwijderen</button></div>
+  <div class="g2">
+   <div class="fg"><label>Omtrek buitenkant (mm)</label><input type="number" id="fC" min="0" step="0.5" oninput="fCalc()"></div>
+   <div class="fg"><label>Hoogte vloeistof (mm)</label><input type="number" id="fH" min="0" step="0.5" oninput="fCalc()"></div>
+   <div class="fg"><label>Glasdikte wand (mm)</label><input type="number" id="fW" value="2" min="0" step="0.1" oninput="fCalc()"></div>
+   <div class="fg"><label>Dikte bodem (mm)</label><input type="number" id="fB" value="4" min="0" step="0.1" oninput="fCalc()"></div>
+   <div class="fg"><label>Max. volume flesje (ml)</label><input type="number" id="fMax" min="0" oninput="fCalc()"></div>
+   <div class="fg"><label>&nbsp;</label><span class="sub">Hoogte meet je van de buitenkant van de bodem tot het vloeistofniveau.</span></div>
+   <div class="fg"><label>Kalibratie: bekend volume (ml)</label><input type="number" id="fKv" min="0" oninput="fCalc()"></div>
+   <div class="fg"><label>Kalibratie: bij hoogte (mm)</label><input type="number" id="fKh" min="0" step="0.5" oninput="fCalc()"></div>
+  </div>
+  <p class="note" style="margin:0">Kalibreren is handig voor flesjes die niet perfect cilindrisch zijn: vul een bekende hoeveelheid, meet de hoogte en vul hem hier in.</p>
+ </div>
+ <div class="card"><div class="ch"><span class="ct">⚖️ Gewicht</span></div>
+  <div class="g2"><div class="fg"><label>Brutogewicht nu (g)</label><input type="number" id="fG" min="0" step="0.01" oninput="fCalc()"></div><div class="fg"><label>Leeg flesje + dop (g)</label><input type="number" id="fT" min="0" step="0.01" oninput="fCalc()"></div></div>
+  <div class="g2"><div class="fg"><label>Dichtheid op basis van</label><select id="fSrc" onchange="fCalc()"></select></div><div class="fg"><label>VG %</label><input type="number" id="fVg" value="70" min="0" max="100" oninput="fCalc()"></div></div>
+  <div class="fg"><label>Vorig brutogewicht (g, optioneel: berekent verbruik)</label><input type="number" id="fPrev" min="0" step="0.01" oninput="fCalc()"></div>
+ </div>
+ <div class="card"><div class="ch"><span class="ct">🧮 Resultaat</span></div>
+  <div id="fViz" style="display:flex;justify-content:center"></div><div class="stats" id="fStats"></div><div class="rc" id="fRes"></div><div class="warn" id="fWarn"></div>
+  <div class="g2" style="margin-top:12px"><div class="fg"><label>Aanvullen tot (ml)</label><input type="number" id="fTarget" min="0" oninput="fCalc()"></div><div class="fg"><label>Zet in liquid</label><select id="fLiq"></select></div></div>
+  <button class="b1" onclick="fSync()">💾 Geschat volume in database zetten</button>
+ </div>
+</div>
+<div id="tab-inv" class="pane">
+ <div class="card"><div class="ch"><span class="ct">Aroma-bibliotheek</span></div><p class="note">Tik op ✎ bij een aroma voor aanbevolen %, maximum, steep, prijs en VG/PG-basis. De calculator gebruikt dit voor waarschuwingen, echte kosten en een nauwkeurigere VG/PG-berekening. De voorbeeldwaarden zijn indicatief: controleer ze bij je leverancier.</p>
+  <div class="g2" style="margin-bottom:10px"><input id="invName" placeholder="Naam" autocomplete="off"><input type="number" id="invMl" placeholder="Volume (ml)"></div>
+  <button class="b1" onclick="addInv()">+ Toevoegen</button></div>
+ <div class="card"><div class="ch"><span class="ct">Huidige voorraad</span><span id="invCount" class="sub"></span></div><div id="inv"></div>
+  <button class="b2" onclick="copyShopping()">🛒 Kopieer boodschappenlijst (≤5ml)</button></div><div class="card"><div class="ch"><span class="ct">🧴 Basisvoorraad</span><span id="baseCount" class="sub"></span></div>
+ <p class="note">Houd VG, PG, voorgemengde base en nicotine bij. Nicotine kan in meerdere sterktes en VG/PG-verhoudingen. Bij "Mix &amp; trek voorraad af" wordt alles automatisch afgetrokken.</p>
+ <div class="g2" style="margin-bottom:8px"><select id="bKind" onchange="bKindUI()"><option value="vg">Pure VG</option><option value="pg">Pure PG</option><option value="mix">Voorgemengd VG/PG</option><option value="nic">Nicotine shot</option></select><input id="bName" placeholder="Naam (optioneel)"></div>
+ <div class="g3" style="margin-bottom:10px"><input type="number" id="bMl" placeholder="Volume (ml)" min="0"><input type="number" id="bVg" placeholder="VG %" min="0" max="100" style="display:none"><input type="number" id="bMg" placeholder="mg/ml" min="0" step="0.5" style="display:none"></div>
+ <div class="tg" id="bNt" style="display:none"><button id="bnf" class="fb" onclick="bSetNt('freebase')">Freebase</button><button id="bns" onclick="bSetNt('salts')">Nic Salt</button></div>
+ <button class="b1" onclick="addBase()">+ Toevoegen aan basisvoorraad</button><div id="bases" style="margin-top:14px"></div></div>
+<div class="card"><div class="ch"><span class="ct">💶 Basisprijzen</span></div><div class="g3"><div class="fg"><label>Nic-shot (€/10ml)</label><input type="number" id="pNic" step="0.1" min="0" oninput="savePrice()"></div><div class="fg"><label>VG (€/liter)</label><input type="number" id="pVg" step="0.5" min="0" oninput="savePrice()"></div><div class="fg"><label>PG (€/liter)</label><input type="number" id="pPg" step="0.5" min="0" oninput="savePrice()"></div></div></div><div class="card"><div class="ch"><span class="ct">📈 Mixgeschiedenis</span><span id="logStat" class="sub"></span></div><div id="log"></div></div>
+</div>
+
+<div id="tab-steep" class="pane">
+ <div class="card"><div class="ch"><span class="ct">Nieuwe batch</span></div>
+  <div class="g2" style="margin-bottom:10px"><input id="steepName" placeholder="Liquid naam"><input type="number" id="steepDays" placeholder="Dagen" value="7"></div>
+  <button class="b1" onclick="addSteep()">+ Batch starten</button></div>
+ <div class="card"><div class="ch"><span class="ct">Batches &amp; proefnotities</span></div><div id="steep"></div></div>
+</div>
+
+<div id="tab-correct" class="pane"><div class="card">
+ <div class="ch"><span class="ct">🛠️ Corrector</span></div><p class="note">Verdun een te sterke batch met nic-vrije base.</p>
+ <div class="g2">
+  <div class="fg"><label>Huidige inhoud (ml)</label><input type="number" id="cMl" value="50"></div>
+  <div class="fg"><label>Huidige nic (mg/ml)</label><input type="number" id="cNic" value="12"></div>
+  <div class="fg"><label>Gewenste nic (mg/ml)</label><input type="number" id="tNic" value="6"></div>
+  <div class="fg"><label>Base</label><select id="cRatio"><option value="70">70VG / 30PG</option><option value="50">50VG / 50PG</option><option value="100">100% VG</option><option value="0">100% PG</option></select></div>
+ </div>
+ <div class="rc"><div class="rr"><b>Toevoegen</b><span class="rv" id="cRes" style="color:var(--ac)"></span></div><div class="rr"><span>VG / PG</span><span class="rv" id="cSplit"></span></div><div class="rr"><span>Nieuw totaal</span><span class="rv" id="cTotal" style="color:var(--ok)"></span></div></div>
+</div></div>
+
+<div id="tab-label" class="pane">
+ <div class="card"><div class="ch"><span class="ct">🎨 Etiket designer</span></div>
+  <div class="g2">
+   <div class="fg"><label>Thema</label><select id="bgTheme"><option value="art">🎨 Kleur-art (auto)</option><option value="tech">Lab Tech</option><option value="inverted">Inverted header</option><option value="vintage">Vintage apothecary</option><option value="grid">Minimalist grid</option><option value="standard">Standard</option></select></div>
+   <div class="fg"><label>Formaat (mm)</label><select id="lblSize"><option value="50x50">50 x 50</option><option value="50x30">50 x 30</option><option value="40x30">40 x 30</option><option value="40x20">40 x 20</option><option value="custom">Eigen formaat...</option></select></div>
+   <div class="g2" id="lblCust" style="display:none;grid-column:1/-1"><div class="fg"><label>Breedte (mm)</label><input type="number" id="lblW" value="50" min="10" max="200"></div><div class="fg"><label>Hoogte (mm)</label><input type="number" id="lblH" value="50" min="10" max="200"></div></div>
+   <div class="fg"><label>Kleurmodus</label><select id="lblMode"><option value="gray">Grijstinten</option><option value="bw">Zwart-wit (thermisch)</option><option value="color">Kleur</option></select></div>
+   <div class="fg"><label>Steep dagen</label><input type="number" id="lblSteep" value="7"></div>
+   <div class="fg"><label>Bestemd voor</label><input id="lblOwner" placeholder="bijv. Jan"></div>
+   <div class="fg"><label>Batch / notitie</label><input id="lblBatch" placeholder="bijv. B12"></div>
+  </div>
+  <label style="display:flex;gap:8px;align-items:center;margin:2px 0 12px;font-size:.8rem;color:var(--tx)"><input type="checkbox" id="lblWarn" checked style="width:auto"> Nicotine-waarschuwing op het etiket</label>
+  <div class="g2" style="margin-bottom:10px"><button class="b2" onclick="newArt()">🎲 Nieuw patroon</button><label class="b2" style="text-align:center;cursor:pointer">🖼️ Eigen achtergrond<input type="file" accept="image/*" hidden onchange="loadBg(event)"></label></div>
+  <div class="g2"><button class="b2" onclick="printLabel()">🖨️ Print op ware grootte</button><button class="b1" onclick="downloadPNG()">📥 PNG (300 dpi)</button></div>
+ </div>
+ <div class="card"><div class="ch"><span class="ct">✨ AI-achtergrond · Gemini</span></div>
+ <div class="fg"><label>API-sleutel (Google AI Studio, blijft lokaal in je browser)</label><input type="password" id="gKey" placeholder="AIza..." oninput="saveCfg()"></div>
+ <div class="g2"><div class="fg"><label>Stijl</label><select id="gStyle" onchange="saveCfg()"><option value="watercolor">Aquarel</option><option value="neon">Neon synthwave</option><option value="vintage">Vintage poster</option><option value="vector">Platte vector</option><option value="oilpaint">Olieverf</option><option value="pop">Pop-art</option></select></div>
+ <div class="fg"><label>Model</label><input id="gModel" oninput="saveCfg()"></div></div>
+ <label style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><input type="checkbox" id="gAuto" onchange="saveCfg()" style="width:auto"> Automatisch genereren voor nieuwe recepten</label>
+ <button class="b1" id="gBtn" onclick="genAI()">✨ Genereer AI-achtergrond</button><div class="note" id="gStat" style="margin-top:8px"></div></div>
+
+ <div class="card"><div style="display:flex;justify-content:center"><canvas id="lblCanvas" style="max-width:100%;height:auto;border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.4);background:#fff"></canvas></div><div class="note" id="lblInfo" style="text-align:center;margin:10px 0 0"></div></div>
+ <div class="card"><div class="ch"><span class="ct">🤖 Instructie voor Gemini</span></div>
+  <div class="g2"><div class="fg"><label>Wat moet Gemini maken?</label><select id="gMode"><option value="full">Volledig etiket</option><option value="bg">Alleen achtergrondfoto</option></select></div>
+  <div class="fg"><label>Stijl van de foto</label><select id="gArt"><option>zwart-wit fotografie</option><option>gravure / lijntekening</option><option>linoleumsnede (linocut)</option><option>halftone krantenstijl</option><option>vintage apothekersillustratie</option><option>minimalistische vectorillustratie</option></select></div></div>
+  <textarea id="gPrompt" rows="12" readonly></textarea>
+  <div class="g2" style="margin-top:10px"><button class="b1" onclick="copyPrompt()">📋 Kopieer instructie</button><a class="b2" href="https://gemini.google.com/app" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">↗️ Open Gemini</a></div>
+  <p class="note" style="margin:12px 0 10px">1. Kopieer de instructie en plak hem in Gemini (kies afbeelding maken). 2. Download het resultaat. 3. Importeer het hier: een volledig etiket vervangt het ontwerp, een achtergrondfoto laad je met "Eigen achtergrond" hierboven. Kloppen de cijfers niet? Kies dan "Alleen achtergrondfoto": de app zet de tekst er zelf op, zonder fouten.</p>
+  <div class="g2"><label class="b2" style="text-align:center;cursor:pointer">📥 Gemini-etiket importeren<input type="file" accept="image/*" hidden onchange="loadGem(event)"></label><button class="b2" onclick="clearGem()">✖ Import verwijderen</button></div>
+ </div>
+</div>
+<div id="tab-backup" class="pane"><div class="card"><div class="ch"><span class="ct">📲 Op je telefoon gebruiken</span></div><div class="note" style="line-height:1.6"><b>Android (Chrome):</b> open de app via je eigen https-link, tik op ⋮ → <i>App installeren</i> of <i>Toevoegen aan startscherm</i>.<br><b>iPhone (Safari):</b> open de link, tik op het deel-icoon → <i>Zet op beginscherm</i>.<br>Daarna start hij als eigen app, werkt offline en bewaart alles op je telefoon. Maak regelmatig een backup: wis je de browsergegevens, dan verdwijnt ook je data.</div><button class="b2" id="inst2" onclick="doInstall()" style="display:none">📲 Nu installeren</button></div>
+<div class="card">
+ <div class="ch"><span class="ct">📂 Backup</span></div><p class="note">Exporteer recepten, voorraad en steep-batches als .json.</p>
+ <button class="b1" style="margin-bottom:14px" onclick="exportBackup()">💾 Exporteer backup</button>
+ <label>Importeren</label><input type="file" accept=".json" onchange="importBackup(event)">
+</div></div>
+</div>
+<div id="ac"></div><nav id="nav"></nav><div id="toast"></div><div id="labOv" class="ov"><div id="labBody"></div></div><div id="wrOv" class="ov"><div class="wseg" id="wSeg"></div><div class="wst" id="wSt"><canvas id="wrC" width="1080" height="1920"></canvas></div><div class="wbt"><button class="b2" onclick="wrShare(false)">💾 Deze slide</button><button class="b1" onclick="wrShare(true)">📤 Deel overzicht</button></div><button class="x wclose" onclick="wrClose()">✕</button></div><canvas id="cf"></canvas>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=(id,d=0)=>{const v=parseFloat($(id).value);return isNaN(v)?d:v};
+const today=()=>new Date().toLocaleDateString('nl-BE');
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}};
+const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+let tt;const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)};
+const copy=async(t,m)=>{try{await navigator.clipboard.writeText(t);toast(m)}catch{toast('⚠️ Kopiëren niet mogelijk in deze omgeving')}};
+const D={NIC:1.1,FL:1.04,VG:1.26,PG:1.036},P={fl:.25};
+
+let nicType='freebase',flavors=[{name:'Capella - Sweet Strawberry',pct:6},{name:'TPA - Bavarian Cream',pct:3}];
+let inventory=load('vape_inv_master',[{id:1,name:'Capella - Sweet Strawberry',ml:30,rec:6,max:10,steep:5,base:'PG'},{id:2,name:'TPA - Bavarian Cream',ml:4,rec:3,max:5,steep:10,base:'PG'},{id:3,name:'Inawera - Custard',ml:50,rec:4,max:8,steep:14,base:'PG'},{id:4,name:'TPA - Peppermint',ml:15,rec:2,max:4,steep:3,base:'PG'}]);
+let steep=load('vape_steep_master',[{id:1,name:'Vanilla Strawberry Custard',date:today(),start:Date.now()-5*864e5,days:14,rating:5,notes:'Heerlijk romig!'}]);
+let saved=load('vape_saved_recipes',[{id:1,name:'Strawberry Bavarian Custard',targetMl:60,targetNic:3,targetVg:70,nicType:'freebase',flavors:[{name:'Capella - Sweet Strawberry',pct:6},{name:'TPA - Bavarian Cream',pct:3}]}]);
+const presets=[
+ {name:'Vanilla Strawberry Custard',required:['Capella - Sweet Strawberry','TPA - Bavarian Cream'],flavors:[{name:'Capella - Sweet Strawberry',pct:6},{name:'TPA - Bavarian Cream',pct:4},{name:'Inawera - Custard',pct:2}]},
+ {name:'Peppermint Breeze',required:['TPA - Peppermint'],flavors:[{name:'TPA - Peppermint',pct:5}]}];
+
+const TABS=[['calc','🧪','Calc'],['dash','📊','Stats'],['suggest','💡','Ideeën'],['saved','📖','Recepten'],['liq','🍶','Liquids'],['fles','📏','Fles'],['inv','📦','Voorraad'],['steep','⏳','Steep'],['correct','🛠️','Fix'],['label','🎨','Etiket'],['backup','📂','Backup']];
+$('nav').innerHTML=TABS.map(([id,i,l],n)=>`<button data-tab="${id}" class="${n?'':'on'}"><i>${i}</i>${l}</button>`).join('');
+$('nav').onclick=e=>{const b=e.target.closest('button');if(b)switchTab(b.dataset.tab)};
+const R={fles:()=>renderBottle(),liq:()=>renderLiquids(),dash:()=>{renderDash();renderBadges();checkBadges()},suggest:()=>{renderSuggestions();renderMatcher()},saved:()=>{renderSaved();renderCmp()},label:()=>{updateLabel();autoAI()},correct:()=>calcCorrection(),steep:()=>renderSteep()};
+function switchTab(id){document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='tab-'+id));document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));R[id]?.();scrollTo({top:0,behavior:'smooth'})}
+function toggleTheme(){const d=document.documentElement,l=d.dataset.theme==='dark';d.dataset.theme=l?'light':'dark';$('th').textContent=l?'☀️':'🌙'}
+['recipeName','targetMl','targetNic','targetVg','nicBaseMg','nicBaseVg'].forEach(id=>$(id).addEventListener('input',calculate));
+['cMl','cNic','tNic','cRatio'].forEach(id=>$(id).addEventListener('input',calcCorrection));
+['bgTheme','lblSize','lblW','lblH','lblMode','lblWarn','lblOwner','lblBatch','lblSteep','gMode','gArt'].forEach(id=>$(id).addEventListener('input',updateLabel));
+$('q').addEventListener('input',renderSaved);
+$('mlChips').innerHTML=[10,30,60,100,120].map(v=>`<span class="chip" onclick="$('targetMl').value=${v};calculate()">${v} ml</span>`).join('');
+
+function setNicType(t){nicType=t;$('btn-fb').className=t==='freebase'?'fb':'';$('btn-salt').className=t==='salts'?'salt':'';calculate()}
+function renderFlavors(){$('flavors').innerHTML=flavors.map((f,i)=>`<div class="fr"><input type="text" value="${esc(f.name)}" autocomplete="off" placeholder="Aroma" oninput="updFlavor(${i},'name',this.value)"><input type="number" value="${f.pct}" step="0.5" min="0" oninput="updFlavor(${i},'pct',parseFloat(this.value)||0)"><span class="sub">%</span><button class="x" onclick="rmFlavor(${i})">✕</button></div>`).join('')}
+const addFlavor=()=>{flavors.push({name:'',pct:2});renderFlavors();calculate()};
+const rmFlavor=i=>{flavors.splice(i,1);renderFlavors();calculate()};
+const updFlavor=(i,k,v)=>{flavors[i][k]=v;const L=k==='name'&&findInv(v);if(L&&L.rec&&flavors[i].pct===2){flavors[i].pct=L.rec;renderFlavors()}calculate()};
+
+function calc(){
+ const ml=num('targetMl'),nic=num('targetNic'),vg=num('targetVg'),pg=100-vg,bm=num('nicBaseMg',20)||20,bv=num('nicBaseVg');
+ const bl=blend.map(x=>({L:liq(x.id),ml:x.ml})).filter(x=>x.L&&x.ml>0),bMl=bl.reduce((a,x)=>a+x.ml,0),blNic=bl.reduce((a,x)=>a+x.ml*x.L.nic,0),blVg=bl.reduce((a,x)=>a+x.ml*x.L.vg/100,0),bCost=bl.reduce((a,x)=>a+x.ml*(x.L.cpm||0),0);
+ const nicMl=Math.max(0,ml*nic-blNic)/bm,nVg=nicMl*bv/100,nPg=nicMl-nVg;
+ const flPct=flavors.reduce((s,f)=>s+(+f.pct||0),0),flMl=ml*flPct/100;
+ const flVg=flavors.reduce((a,f)=>a+(findInv(f.name)?.base==='VG'?(+f.pct||0):0),0)*ml/100,vN=ml*vg/100-nVg-flVg-blVg,pN=ml*pg/100-nPg-(flMl-flVg)-(bMl-blVg);
+ const px=bases.find(b=>b.kind==='mix'&&String(b.id)===$('mixSel').value),r=px?(px.vg||0)/100:0;let mixMl=0,capped=false;
+ if(px){const nv=Math.max(vN,0),np=Math.max(pN,0),x=r>=1?nv:r<=0?np:Math.min(nv/r,np/(1-r));mixMl=Math.min(x,px.ml);capped=x>px.ml+.05}
+ return{ml,nic,vg,pg,bm,nicMl,flPct,flMl,vN,pN,bMl,blNic,bCost,mixMl,capped,mixVgPct:px?px.vg:0,vgMl:Math.max(0,vN-mixMl*r),pgMl:Math.max(0,pN-mixMl*(1-r))};
+}
+let raf=0;function calculate(){cancelAnimationFrame(raf);raf=requestAnimationFrame(calcNow)}
+function calcNow(){$('vgSlider').value=num('targetVg');
+ const c=calc();$('ratio').textContent=`${c.vg}VG / ${c.pg}PG`;
+ let cost=c.nicMl*price.nic/10+c.vgMl*price.vg/1000+c.pgMl*price.pg/1000+c.mixMl*(c.mixVgPct/100*price.vg+(1-c.mixVgPct/100)*price.pg)/1000+c.bCost;
+ flavors.forEach(f=>{const L=findInv(f.name);cost+=c.ml*(+f.pct||0)/100*(L&&L.price&&L.size?L.price/L.size:P.fl)});
+ const it=blend.filter(x=>x.ml>0&&liq(x.id)).map(x=>{const L=liq(x.id),v=L.vg/100;return['var(--pk)',`🍶 ${esc(L.name)}`,x.ml,D.VG*v+D.PG*(1-v)]});if(c.nicMl>0)it.push(['var(--pu)',`Nic ${nicType==='salts'?'Salt':'Freebase'} ${c.bm}mg · ${(c.nicMl/10).toFixed(1)}×10ml`,c.nicMl,D.NIC]);
+ flavors.forEach(f=>it.push(['var(--am)',`${esc(f.name||'Aroma')} (${f.pct}%${findInv(f.name)?.base==='VG'?' · VG':''})`,c.ml*(+f.pct||0)/100,D.FL]));
+ const base=[...(c.mixMl>0?[['var(--tl)',`Premix ${c.mixVgPct}VG/${100-c.mixVgPct}PG`,c.mixMl,D.VG*c.mixVgPct/100+D.PG*(1-c.mixVgPct/100)]]:[]),['var(--ok)','VG',c.vgMl,D.VG],['var(--ac)','PG',c.pgMl,D.PG]],G=mode==='g',all=it.concat(G?base.slice().sort((a,b)=>rk(a[1])-rk(b[1])):base);let cum=0;
+ $('res').innerHTML=(G?'<div class="note" style="padding-top:8px">⚖️ Zet de fles op de weegschaal en vul aan tot het cumulatieve gewicht (niet tarreren). Dikke VG als laatste.</div>':'')+all.map(([col,l,ml,d],n)=>{const g=ml*d;cum+=g;return`<div class="rr"${G?' onclick="this.classList.toggle(\'dn\');chk()" style="cursor:pointer"':''}><span style="color:${col};font-weight:700">${G?(n+1)+'. ':''}${l}</span>${G?`<span class="rv" style="color:${col}">+${g.toFixed(2)} g <small style="color:var(--mu)">→ ${cum.toFixed(2)} g</small></span>`:`<span class="rv" style="color:${col}">${ml.toFixed(2)} ml / ${g.toFixed(2)} g</span>`}</div>`}).join('');
+ const seg=[['nic',c.nicMl,'var(--pu)'],['aroma',c.flMl,'var(--am)'],['VG',c.vgMl,'var(--ok)'],['PG',c.pgMl,'var(--ac)'],['premix',c.mixMl,'var(--tl)'],['liquids',c.bMl,'var(--pk)']],tot=seg.reduce((s,x)=>s+x[1],0)||1;
+ $('bar').innerHTML=seg.map(s=>`<div style="width:${s[1]/tot*100}%;background:${s[2]}"></div>`).join('');
+ $('leg').innerHTML=seg.map(s=>`<span><i style="background:${s[2]}"></i>${s[0]} ${(s[1]/tot*100).toFixed(1)}%</span>`).join('');
+ lastCost=cost;showMax();drawBottle();showAfter();drawRadar();renderMtl();$('sNic').textContent=(c.nic*c.ml).toFixed(0);$('sFl').textContent=c.flPct.toFixed(1)+'%';$('sCost').textContent='€'+cost.toFixed(2);$('sMl').textContent='€'+(c.ml?cost/c.ml:0).toFixed(3);
+ const w=[];
+ if(c.vN<0)w.push(['e','Nic-shot bevat meer VG dan het doel toelaat. Verlaag shot-VG% of verhoog doel-VG%.']);
+ if(c.pN<0)w.push(['e','Nic-shot en aroma\'s nemen meer PG in dan beschikbaar. Verhoog PG of verlaag aroma%.']);
+ if(c.flPct>25)w.push(['','Hoog aromapercentage ('+c.flPct.toFixed(1)+'%): kan smaak verzadigen en zwaar aanvoelen.']);
+ if(c.nic>20)w.push(['','Hoge nicotinesterkte: let op bij freebase.']);
+ if(c.nicMl>0&&c.nicMl>c.ml*.5)w.push(['','Meer dan de helft van de batch is nic-shot.']);
+ let rs=0;flavors.forEach(f=>{const L=findInv(f.name);if(!L)return;if(L.max&&f.pct>L.max)w.push(['e',`${esc(f.name)}: ${f.pct}% ligt boven het maximum van ${L.max}%.`]);else if(L.rec&&f.pct>L.rec*1.5)w.push(['',`${esc(f.name)}: ${f.pct}% is ruim boven het aanbevolen ${L.rec}%.`]);rs=Math.max(rs,L.steep||0)});recSteep=rs;
+ if(rs)w.push(['i',`⏳ Aanbevolen steep: ${rs} dagen (tik om te gebruiken)`]);
+ const nbS=bases.find(b=>b.kind==='nic'&&String(b.id)===$('nicSel').value);if(nbS&&c.nicMl>nbS.ml)w.push(['e',`${esc(nbS.name)}: voorraad ${nbS.ml} ml, nodig ${c.nicMl.toFixed(1)} ml.`]);
+ [['vg',c.vgMl,'VG'],['pg',c.pgMl,'PG']].forEach(([k,v,l])=>{const t=bases.filter(b=>b.kind===k).reduce((a,b)=>a+b.ml,0);if(bases.some(b=>b.kind===k)&&v>t)w.push(['e',`${l}-voorraad onvoldoende: nodig ${v.toFixed(1)} ml, beschikbaar ${t.toFixed(0)} ml.`])});
+ if(c.capped)w.push(['i','ℹ️ De voorgemengde base is op: de rest wordt aangevuld met pure VG/PG.']);
+ blend.forEach(x=>{const L=liq(x.id);if(L&&x.ml>L.ml)w.push(['e',`${esc(L.name)}: voorraad ${L.ml} ml, nodig ${x.ml} ml.`])});
+ if(c.bMl>c.ml+.01)w.push(['e',`De liquids (${c.bMl.toFixed(1)} ml) zijn meer dan het batchvolume (${c.ml} ml).`]);
+ if(c.blNic>c.ml*c.nic+.01)w.push(['e',`De gebruikte liquids bevatten al meer nicotine dan het doel: minstens ${(c.blNic/c.ml).toFixed(2)} mg/ml.`]);
+ if(blend.some(x=>liq(x.id)&&x.ml>0)){const pr=aromaProfile();if(pr.length)w.push(['i',`🍓 Resulterend aromaprofiel: ${pr.map(f=>`${esc(f.name)} ${f.pct}%`).join(' · ')}`])}
+ $('calcWarn').innerHTML=w.map(x=>`<div class="${x[0]}"${x[0]==='i'?' onclick="useSteep()" style="cursor:pointer"':''}>${x[0]==='i'?'':'⚠️ '}${x[1]}</div>`).join('');
+ updateLabel();
+}
+function roundShots(){const n=num('targetNic'),bm=num('nicBaseMg',20)||20,ml=num('targetMl',60);if(n<=0)return toast('⚠️ Voer eerst nicotine in');const s=Math.max(1,Math.round(ml*n/bm/10)),m=Math.round(s*10*bm/n);$('targetMl').value=m;calculate();toast(`🎯 ${m} ml = ${s} volle shot(s)`)}
+function copySheet(){const c=calc();let t=`${$('recipeName').value}\n${c.ml}ml · ${c.vg}VG/${c.pg}PG · ${c.nic}mg ${nicType}\n\n`;if(c.nic>0)t+=`Nic: ${c.nicMl.toFixed(2)} ml\n`;flavors.forEach(f=>t+=`${f.name}: ${(c.ml*f.pct/100).toFixed(2)} ml\n`);if(c.mixMl>0)t+=`Premix ${c.mixVgPct}VG/${100-c.mixVgPct}PG: ${c.mixMl.toFixed(2)} ml\n`;t+=`VG: ${c.vgMl.toFixed(2)} ml (${(c.vgMl*D.VG).toFixed(2)} g)\nPG: ${c.pgMl.toFixed(2)} ml (${(c.pgMl*D.PG).toFixed(2)} g)`;copy(t,'📋 Mixlijst gekopieerd')}
+
+const curRecipe=()=>({id:Date.now(),name:$('recipeName').value||'Mijn Recept',targetMl:num('targetMl',60),targetNic:num('targetNic',3),targetVg:num('targetVg',70),nicType,flavors:structuredClone(flavors),blend:structuredClone(blend)});
+const saveRecipe=()=>{const r=curRecipe();saved.push(r);store('vape_saved_recipes',saved);toast(`✅ "${r.name}" opgeslagen`);checkBadges()};
+function renderSaved(){renderRecent();
+ const q=$('q').value.toLowerCase();$('savedCount').textContent=`${saved.length} recepten`;
+ const list=saved.map((r,i)=>[r,i]).filter(([r])=>!q||(r.name+r.flavors.map(f=>f.name).join()).toLowerCase().includes(q)).sort((a,b)=>(b[0].fav?1:0)-(a[0].fav?1:0));
+ $('saved').innerHTML=list.map(([r,i])=>`<div class="it"><div><b style="font-size:.86rem"><span style="cursor:pointer" onclick="fav(${i})">${r.fav?'⭐':'☆'}</span> ${esc(r.name)}</b><div class="sub">${r.targetVg}VG/${100-r.targetVg}PG · ${r.targetNic}mg · ${r.flavors.length} aroma's${(m=>m!=null?` · max ${m} ml`:'')(maxBatch(r.flavors))}</div></div><div style="display:flex;gap:5px"><button class="b2 sm" onclick="loadSaved(${i})">Laden</button><button class="b2 sm" onclick="dupSaved(${i})">⧉</button><button class="b2 sm" onclick="shareRecipe(${i})">📤</button><button class="x" onclick="delSaved(${i})">✕</button></div></div>`).join('')||'<p class="note">Geen recepten gevonden.</p>';
+}
+const sv=()=>{store('vape_saved_recipes',saved);renderSaved()};
+const fav=i=>{saved[i].fav=!saved[i].fav;sv()};
+const dupSaved=i=>{saved.push({...structuredClone(saved[i]),id:Date.now(),name:saved[i].name+' (kopie)',fav:false});sv();toast('⧉ Gedupliceerd')};
+const delSaved=i=>{saved.splice(i,1);sv()};
+function loadSaved(i){applyR(saved[i])}function applyR(r){$('recipeName').value=r.name;$('targetMl').value=r.targetMl;$('targetNic').value=r.targetNic;$('targetVg').value=r.targetVg;flavors=structuredClone(r.flavors);blend=(r.blend||[]).filter(b=>liq(b.id));renderFlavors();renderBlend();setNicType(r.nicType||'freebase');switchTab('calc')}
+
+function deductInventory(){
+ const ml=num('targetMl'),miss=[];let n=0;useBases(miss);
+ flavors.forEach(f=>{const m=inventory.find(i=>i.name.toLowerCase()===f.name.toLowerCase()),need=ml*(+f.pct||0)/100;if(!m)return;if(m.ml<need)miss.push(`${m.name} (${(need-m.ml).toFixed(1)} ml tekort)`);m.ml=Math.max(0,+(m.ml-need).toFixed(2));n++});
+ log.unshift({t:Date.now(),ml,cost:lastCost,r:curRecipe(),g:mode==='g'||labOpen});log.length=Math.min(log.length,500);store('vape_log',log);renderLog();addAutoSteep();addLiquidFromBatch();renderInventory();checkBadges();toast(miss.length?`⚠️ Tekort: ${miss.join(', ')}`:`📉 ${n} aroma('s) afgetrokken · steep gestart · liquid opgeslagen`);
+}
+function renderInventory(){
+ $('invCount').textContent=`${inventory.length} items`;
+ $('inv').innerHTML=inventory.map((it,i)=>{
+  const tags=[it.rec&&`aanb. ${it.rec}%`,it.max&&`max ${it.max}%`,it.steep&&`steep ${it.steep}d`,it.base==='VG'&&'VG-basis',it.price&&it.size&&`€${(it.price/it.size).toFixed(2)}/ml`].filter(Boolean).join(' · ');
+  const fld=[['rec','Aanbev. %','0.5'],['max','Max %','0.5'],['steep','Steep (dgn)','1'],['price','Prijs (€)','0.01'],['size','Flesje (ml)','1']].map(([k,l,st])=>`<div class="fg"><label>${l}</label><input type="number" min="0" step="${st}" value="${it[k]||''}" onchange="setInvF(${i},'${k}',this.value)"></div>`).join('');
+  return`<div class="it" style="flex-wrap:wrap"><div><b style="font-size:.86rem">${esc(it.name)}</b><div class="sub">${tags||'Geen richtlijnen ingesteld'}</div>${it.ml<=5?'<span class="bg bw">⚠️ Laag (≤5ml)</span>':it.ml<=15?'<span class="bg ba">Bijna op</span>':''}</div><div style="display:flex;align-items:center;gap:6px"><input type="number" value="${it.ml}" onchange="updInv(${i},this.value)" style="width:70px;text-align:center"><span class="sub">ml</span><button class="b2 sm" onclick="editIdx=editIdx===${i}?-1:${i};renderInventory()">✎</button><button class="x" onclick="rmInv(${i})">✕</button></div>${editIdx===i?`<div class="g3" style="flex-basis:100%;margin-top:6px">${fld}<div class="fg"><label>Basis</label><select onchange="setInvF(${i},'base',this.value)"><option value="PG"${it.base==='VG'?'':' selected'}>PG</option><option value="VG"${it.base==='VG'?' selected':''}>VG</option></select></div><div class="fg"><label>Categorie</label><select onchange="setInvF(${i},'cat',this.value)"><option value="">Automatisch</option>${CATS.map(([k,n])=>`<option value="${k}"${it.cat===k?' selected':''}>${n}</option>`).join('')}</select></div></div>`:''}</div>`}).join('');
+ store('vape_inv_master',inventory);
+}
+function addInv(){const n=$('invName').value.trim();if(!n)return;inventory.push({id:Date.now(),name:n,ml:parseFloat($('invMl').value)||0});$('invName').value=$('invMl').value='';renderInventory();renderFlavors();checkBadges()}
+const updInv=(i,v)=>{inventory[i].ml=parseFloat(v)||0;renderInventory()};
+const rmInv=i=>{inventory.splice(i,1);renderInventory();renderFlavors()};
+const copyShopping=()=>{const l=inventory.filter(i=>i.ml<=5);l.length?copy('🛒 Bijkopen:\n'+l.map(i=>'• '+i.name).join('\n'),'🛒 Lijst gekopieerd'):toast('✅ Alles op voorraad')};
+
+function renderSuggestions(){
+ const names=inventory.map(i=>i.name.toLowerCase());
+ $('suggestions').innerHTML=presets.map((r,i)=>{const have=r.required.filter(q=>names.some(n=>n.includes(q.toLowerCase()))).length,ok=have===r.required.length;
+  return`<div class="it"><div><b style="font-size:.86rem">${esc(r.name)}</b><div class="sub">${r.flavors.map(f=>esc(f.name)).join(', ')}</div><span class="bg ${ok?'bk':'bw'}">${ok?'✅ In voorraad':`⚠️ ${have}/${r.required.length} aanwezig`}</span></div><button class="b2 sm" onclick="loadPreset(${i})">Laden</button></div>`}).join('');
+}
+function loadPreset(i){const r=presets[i];$('recipeName').value=r.name;flavors=structuredClone(r.flavors);renderFlavors();calculate();switchTab('calc')}
+
+function renderSteep(){
+ $('steep').innerHTML=steep.map((b,i)=>{
+  const r=b.rating||0,el=(Date.now()-(b.start||b.id))/864e5,left=Math.ceil(b.days-el),p=Math.min(100,Math.max(0,el/b.days*100)),done=left<=0;
+  return`<div class="it" style="flex-direction:column;align-items:stretch;gap:8px"><div style="display:flex;gap:12px;align-items:center">
+  <div class="ring" style="background:conic-gradient(${done?'var(--ok)':'var(--ac)'} ${p}%,var(--bd) 0)"><span>${done?'✓':left+'d'}</span></div>
+  <div style="flex:1"><b style="font-size:.86rem">${esc(b.name)}</b><div class="sub">Start ${esc(b.date)} · ${b.days} dagen · ${done?'klaar om te vapen!':left+' dagen te gaan'}</div></div><button class="x" onclick="rmSteep(${i})">✕</button></div>
+  <div style="display:flex;align-items:center;gap:10px"><span style="color:var(--am);cursor:pointer;white-space:nowrap" onclick="cycleRating(${i})">${'★'.repeat(r)+'☆'.repeat(5-r)}</span>
+  <input type="text" value="${esc(b.notes)}" placeholder="Proefnotities..." onchange="steep[${i}].notes=this.value;store('vape_steep_master',steep)" style="font-size:.78rem"></div></div>`}).join('');
+ store('vape_steep_master',steep);
+}
+function addSteep(){const n=$('steepName').value.trim()||$('recipeName').value;steep.push({id:Date.now(),name:n,date:today(),start:Date.now(),days:parseInt($('steepDays').value)||7,rating:0,notes:''});$('steepName').value='';renderSteep()}
+const cycleRating=i=>{steep[i].rating=((steep[i].rating||0)+1)%6;renderSteep();checkBadges()};
+const rmSteep=i=>{steep.splice(i,1);renderSteep()};
+
+function calcCorrection(){
+ const ml=num('cMl'),cur=num('cNic'),tgt=num('tNic'),vp=num('cRatio',70);
+ if(cur<=0||tgt<=0||tgt>=cur){$('cRes').textContent=cur>0&&tgt>=cur?'Doel ≥ huidig':'Ongeldig';$('cSplit').textContent='–';$('cTotal').textContent=ml.toFixed(1)+' ml';return}
+ const t=ml*cur/tgt,a=t-ml,v=a*vp/100;$('cRes').textContent=`+${a.toFixed(1)} ml`;$('cSplit').textContent=`${v.toFixed(1)} / ${(a-v).toFixed(1)} ml`;$('cTotal').textContent=t.toFixed(1)+' ml';
+}
+
+
+let mode='ml',seed=0,upImg=null,wl=null,lastCost=0,lastSig='',custom=false,recSteep=0,editIdx=-1;
+function setMode(m){mode=m;try{if(m==='g'){navigator.wakeLock?.request('screen').then(w=>wl=w).catch(()=>{});toast('⚖️ Scherm blijft aan tijdens het mixen')}else{wl?.release();wl=null}}catch{}$('m-ml').className=m==='ml'?'fb':'';$('m-g').className=m==='g'?'salt':'';calculate()}
+const ART={
+ tobacco:{k:['tabak','tobacco','ry4','cigar','pipe','cuban','virginia'],c:['#1c0d02','#78350f','#d97706'],m:'waves'},
+ fruit:{k:['strawberry','berry','fruit','apple','mango','peach','grape','cherry','aarbei','framboos','lemon','melon','banana'],c:['#4c0519','#be123c','#fb7185'],m:'bubbles'},
+ cream:{k:['custard','cream','vanilla','bavarian','butter','caramel','pie','donut','cake','waffle'],c:['#451a03','#92400e','#fde68a'],m:'waves'},
+ frost:{k:['menthol','ice','mint','frost','cool','koolada','fris'],c:['#0c4a6e','#0284c7','#bae6fd'],m:'crystal'},
+ drinks:{k:['coffee','cola','espresso','energy','lemonade','tea','soda','latte'],c:['#180e07','#451a03','#f59e0b'],m:'bubbles'},
+ toxic:{k:['toxic','alien','cyber','acid','sour','neon'],c:['#3b0764','#052e16','#22c55e'],m:'hex'}};
+const rng=s=>()=>(s=(s*16807)%2147483647)/2147483647;
+function artThemes(){const t=(($('recipeName').value||'')+' '+(blend.length?aromaProfile():flavors).map(f=>f.name).join(' ')).toLowerCase(),sc=Object.entries(ART).map(([k,v])=>[k,v.k.filter(w=>t.includes(w)).length]).sort((a,b)=>b[1]-a[1]);return[sc[0][1]?sc[0][0]:'fruit',sc[1][1]?sc[1][0]:null]}
+function motif(x,w,h,t,r,al){
+ x.globalAlpha=.4*al;const p=t.c;
+ if(t.m==='bubbles')for(let i=0;i<26;i++){const R=(.03+r()*.1)*w,cx=r()*w,cy=r()*h,g=x.createRadialGradient(cx-R*.3,cy-R*.3,R*.1,cx,cy,R);g.addColorStop(0,'#fff');g.addColorStop(.35,p[2]);g.addColorStop(1,p[1]);x.fillStyle=g;x.beginPath();x.arc(cx,cy,R,0,7);x.fill()}
+ else if(t.m==='waves')for(let i=0;i<9;i++){x.strokeStyle=i%2?p[2]:'#fff';x.lineWidth=w*.02*(1+r());x.beginPath();const y0=h*i/9+r()*h*.08,A=h*.06*(1+r()),f=2+r()*3,ph=r()*6;for(let u=0;u<=w;u+=4)x[u?'lineTo':'moveTo'](u,y0+Math.sin(u/w*f*6.28+ph)*A);x.stroke()}
+ else if(t.m==='crystal')for(let i=0;i<7;i++){const cx=r()*w,cy=r()*h,L=(.1+r()*.2)*w;x.strokeStyle=i%2?'#fff':p[2];x.lineWidth=w*.008;for(let k=0;k<6;k++){const an=k*Math.PI/3+i,mx=cx+Math.cos(an)*L*.6,my=cy+Math.sin(an)*L*.6;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(an)*L,cy+Math.sin(an)*L);x.stroke();for(const d of[-1,1]){x.beginPath();x.moveTo(mx,my);x.lineTo(mx+Math.cos(an+d*.8)*L*.25,my+Math.sin(an+d*.8)*L*.25);x.stroke()}}}
+ else for(let i=0;i<40;i++){const cx=r()*w,cy=r()*h,R=(.03+r()*.05)*w;x.strokeStyle=i%2?p[2]:'#fff';x.lineWidth=w*.006;x.beginPath();for(let k=0;k<=6;k++)x[k?'lineTo':'moveTo'](cx+R*Math.cos(k*Math.PI/3),cy+R*Math.sin(k*Math.PI/3));x.stroke()}
+ x.globalAlpha=1}
+function artCanvas(w,h){
+ const[a,b]=artThemes(),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+ const sd=seed||[...(($('recipeName').value)+flavors.map(f=>f.name).join())].reduce((q,ch)=>(q*31+ch.charCodeAt(0))%2147483646,7)+1,r=rng(sd);
+ const g=x.createLinearGradient(0,0,w,h);ART[a].c.forEach((col,i)=>g.addColorStop(i/2,col));x.fillStyle=g;x.fillRect(0,0,w,h);
+ motif(x,w,h,ART[a],r,1);if(b)motif(x,w,h,ART[b],r,.55);return c}
+function bgSource(w,h){
+ if(!upImg)return artCanvas(w,h);
+ const c=document.createElement('canvas');c.width=w;c.height=h;const k=Math.max(w/upImg.width,h/upImg.height),dw=upImg.width*k,dh=upImg.height*k;
+ c.getContext('2d').drawImage(upImg,(w-dw)/2,(h-dh)/2,dw,dh);return c}
+function loadBg(e){const f=e.target.files[0];if(!f)return;const i=new Image();i.onload=()=>{upImg=i;custom=true;$('bgTheme').value='art';updateLabel();toast('🖼️ Achtergrond geladen')};i.src=URL.createObjectURL(f)}
+function newArt(){seed=Math.floor(Math.random()*2e9)+1;upImg=null;custom=false;lastSig=sig();$('bgTheme').value='art';updateLabel()}
+
+let log=load('vape_log',[]);
+const cfg=load('vape_cfg',{key:'',model:'gemini-3.1-flash-image',style:'watercolor',auto:false}),aiCache=load('vape_ai_art',{});
+let aiBusy=false;
+const STYLES={watercolor:'lush watercolor painting',neon:'neon cyberpunk synthwave illustration',vintage:'vintage retro poster lithograph with halftone texture',vector:'bold flat vector illustration with geometric shapes',oilpaint:'rich oil painting with expressive brush strokes',pop:'vibrant pop art with bold outlines'};
+function initCfg(){$('pNic').value=price.nic;$('pShop').value=price.shop;$('pDay').value=price.day;$('pVg').value=price.vg;$('pPg').value=price.pg;$('gKey').value=cfg.key||'';$('gModel').value=cfg.model;$('gStyle').value=cfg.style;$('gAuto').checked=!!cfg.auto}
+function saveCfg(){cfg.key=$('gKey').value.trim();cfg.model=$('gModel').value.trim()||'gemini-3.1-flash-image';cfg.style=$('gStyle').value;cfg.auto=$('gAuto').checked;store('vape_cfg',cfg)}
+const sig=()=>(($('recipeName').value)+'|'+flavors.map(f=>f.name).join(',')+'|'+cfg.style).toLowerCase();
+function useImg(u){const i=new Image();i.onload=()=>{upImg=i;$('bgTheme').value='art';updateLabel()};i.src=u}
+function autoAI(){if(custom||aiBusy||!cfg.auto||!cfg.key)return;const k=sig();if(k===lastSig)return;lastSig=k;aiCache[k]?useImg(aiCache[k]):genAI(true)}
+async function genAI(silent){
+ if(aiBusy)return;saveCfg();if(!cfg.key)return silent||toast('🔑 Vul eerst je Gemini API-sleutel in');
+ aiBusy=true;$('gBtn').disabled=true;$('gStat').textContent='⏳ Gemini schildert je achtergrond...';custom=false;
+ const names=flavors.filter(f=>f.name).map(f=>f.name.replace(/^[\w.]+\s*-\s*/,'')).join(', ')||'sweet fruit';
+ const prompt=`Create an abstract ${STYLES[cfg.style]||STYLES.watercolor} background artwork for an e-liquid bottle label named "${$('recipeName').value}", capturing these flavors: ${names}. Evoke the taste with colors, shapes and textures (ingredients, swirls, vapor). Rich saturated colors. Keep the center calm and low-detail so overlaid text stays readable. Absolutely no text, letters, numbers, logos or people.`;
+ try{
+  const ar={'50x50':'1:1','50x30':'3:2','40x30':'4:3','40x20':'21:9'}[$('lblSize').value];
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(cfg.model)}:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':cfg.key},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseModalities:['IMAGE'],imageConfig:{aspectRatio:ar}}})});
+  const j=await r.json();if(!r.ok)throw new Error(j.error?.message||'HTTP '+r.status);
+  const d=(j.candidates?.[0]?.content?.parts||[]).map(q=>q.inlineData||q.inline_data).find(Boolean);if(!d)throw new Error('Geen afbeelding ontvangen (mogelijk geblokkeerd door filters)');
+  const i=new Image();await new Promise((ok,no)=>{i.onload=ok;i.onerror=no;i.src=`data:${d.mimeType||d.mime_type||'image/png'};base64,${d.data}`});
+  const c=document.createElement('canvas'),k=Math.min(1,800/Math.max(i.width,i.height));c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);
+  const u=c.toDataURL('image/jpeg',.82);aiCache[sig()]=u;lastSig=sig();Object.keys(aiCache).slice(0,-10).forEach(x=>delete aiCache[x]);store('vape_ai_art',aiCache);
+  useImg(u);$('gStat').textContent='✅ AI-achtergrond klaar, gemaakt met Gemini';
+ }catch(e){$('gStat').textContent='❌ '+e.message;if(!silent)toast('❌ Gemini: '+e.message)}
+ aiBusy=false;$('gBtn').disabled=false}
+function renderLog(){
+ const t=log.reduce((a,l)=>a+l.ml,0),c=log.reduce((a,l)=>a+l.cost,0);
+ $('logStat').textContent=log.length?`${log.length} batches · ${t} ml · €${c.toFixed(2)}`:'';
+ $('log').innerHTML=log.slice(0,8).map((l,i)=>`<div class="it"><div><b style="font-size:.86rem">${esc(l.r.name)}</b><div class="sub">${new Date(l.t).toLocaleDateString('nl-BE')} · ${l.ml} ml · €${l.cost.toFixed(2)}</div></div><button class="b2 sm" onclick="applyR(log[${i}].r)">↻ Opnieuw</button></div>`).join('')||'<p class="note">Nog geen batches gemixt.</p>'}
+
+const price=load('vape_prices',{nic:3,vg:15,pg:15});price.shop=price.shop??5;price.day??=3;
+const findInv=n=>inventory.find(i=>i.name.toLowerCase()===String(n||'').toLowerCase().trim());
+function savePrice(){price.nic=parseFloat($('pNic').value)||0;price.vg=parseFloat($('pVg').value)||0;price.pg=parseFloat($('pPg').value)||0;price.shop=parseFloat($('pShop').value)||0;price.day=parseFloat($('pDay').value)||0;store('vape_prices',price);calculate();renderDash()}
+function setInvF(i,k,v){inventory[i][k]=(k==='base'||k==='cat')?v:(parseFloat(v)||0);renderInventory();renderFlavors();calculate()}
+function useSteep(){if(!recSteep)return;$('steepDays').value=recSteep;$('lblSteep').value=recSteep;updateLabel();toast(`⏳ Steep ingesteld op ${recSteep} dagen`)}
+function addAutoSteep(){steep.push({id:Date.now()+1,name:$('recipeName').value||'Batch',date:today(),start:Date.now(),days:recSteep||parseInt($('steepDays').value)||7,rating:0,notes:''});renderSteep()}
+
+function maxBatch(fl){let m=Infinity;for(const f of fl){if(!f.name||!(+f.pct>0))continue;const L=findInv(f.name);if(!L)return null;m=Math.min(m,L.ml/(f.pct/100))}return isFinite(m)?Math.floor(m):null}
+function showMax(){const m=maxBatch(flavors);$('maxB').innerHTML=m==null?'':`📦 Met je voorraad kun je maximaal <b>${m} ml</b> mixen. <a href="#" style="color:var(--ac)" onclick="$('targetMl').value=${m};calculate();return false">Gebruik</a>`}
+function chk(){const r=[...document.querySelectorAll('#res .rr')];if(r.length&&r.every(x=>x.classList.contains('dn'))){toast('🎉 Alles toegevoegd: schudden en laten steepen!');navigator.vibrate?.(200)}}
+function renderDash(){
+ const t=log.reduce((a,l)=>a+l.ml,0),c=log.reduce((a,l)=>a+l.cost,0);
+ $('dStats').innerHTML=[[log.length,'batches'],[t,'ml gemixt'],['€'+c.toFixed(2),'uitgegeven'],['€'+(t?c/t:0).toFixed(3),'per ml']].map(([v,l])=>`<div class="st"><b>${v}</b><span>${l}</span></div>`).join('');
+ const now=new Date(),ms=[...Array(6)].map((_,i)=>{const d=new Date(now.getFullYear(),now.getMonth()-5+i,1);return{k:d.getFullYear()*12+d.getMonth(),l:d.toLocaleDateString('nl-BE',{month:'short'}),v:0}});
+ log.forEach(l=>{const d=new Date(l.t),m=ms.find(x=>x.k===d.getFullYear()*12+d.getMonth());if(m)m.v+=l.ml});
+ const mx=Math.max(1,...ms.map(m=>m.v));
+ $('dChart').innerHTML=`<svg viewBox="0 0 300 120" style="width:100%"><defs><linearGradient id="gb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#c084fc"/></linearGradient></defs>${ms.map((m,i)=>{const h=m.v/mx*75;return`<rect x="${i*50+10}" y="${95-h}" width="30" height="${Math.max(h,2)}" rx="6" fill="url(#gb)"/><text x="${i*50+25}" y="111" text-anchor="middle" font-size="10" fill="#8b9ab3">${m.l}</text><text x="${i*50+25}" y="${90-h}" text-anchor="middle" font-size="9" fill="#8b9ab3">${m.v||''}</text>`}).join('')}</svg>`;
+ const al=[];
+ steep.forEach(b=>{const left=Math.ceil(b.days-(Date.now()-(b.start||b.id))/864e5);if(left<=0)al.push(['bk',`✅ ${esc(b.name)} is klaar om te vapen`]);else if(left<=2)al.push(['ba',`⏳ ${esc(b.name)}: nog ${left} ${left>1?'dagen':'dag'} steepen`])});
+ inventory.filter(i=>i.ml<=5).forEach(i=>al.push(['bw',`⚠️ ${esc(i.name)}: bijna op (${i.ml} ml)`]));bases.filter(b=>b.ml<=LOW[b.kind]).forEach(b=>al.push(['bw',`⚠️ ${esc(b.name)}: bijna op (${b.ml} ml)`]));
+ if(Date.now()-load('vape_lastbackup',0)>14*864e5)al.push(['ba','💾 Je laatste backup is ouder dan 14 dagen (of er is er nog geen). Exporteer er een in de tab Backup.']);
+ {const ready=liquids.reduce((a,l)=>a+(l.ml||0),0),d=price.day;if(d>0){const days=ready/d,end=new Date(Date.now()+days*864e5),st=recSteep||7,start=new Date(end.getTime()-st*864e5),f=x=>x.toLocaleDateString('nl-BE',{day:'numeric',month:'short'});$('dRun').innerHTML=`Je hebt <b>${ready.toFixed(0)} ml</b> gemengde liquid: genoeg voor ±<b>${Math.floor(days)} dagen</b> (tot ${f(end)}). ${start<=Date.now()?'Start je volgende batch <b>nu</b>':'Start je volgende batch uiterlijk op <b>'+f(start)+'</b>'}, rekening houdend met ±${st} dagen steepen.`;if(days<st+3)al.push(['bw','⏳ Je liquid raakt binnenkort op: start een nieuwe batch.'])}else $('dRun').textContent='Vul je dagverbruik in om te zien hoelang je voorraad reikt.'}
+ $('dAlerts').innerHTML=al.map(a=>`<div class="it"><span class="bg ${a[0]}" style="margin:0;font-size:.75rem">${a[1]}</span></div>`).join('')||'<p class="note">Alles in orde 🎉</p>';
+ $('dSave').textContent=t?`Je hebt ongeveer €${(t/10*price.shop-c).toFixed(2)} bespaard ten opzichte van kant-en-klare liquid (${t} ml à €${price.shop}/10 ml). Dit is een schatting.`:'Mix een batch om je besparing te zien.';
+}
+const enc=r=>'ELAB1:'+btoa(unescape(encodeURIComponent(JSON.stringify({n:r.name,ml:r.targetMl,nic:r.targetNic,vg:r.targetVg,t:r.nicType,f:r.flavors.map(f=>[f.name,f.pct])}))));
+function shareRecipe(i){$('shareCode').value=enc(saved[i]);$('shareCode').select();toast('📤 Deelcode staat klaar');try{if(navigator.share&&matchMedia('(pointer:coarse)').matches)navigator.share({title:saved[i].name,text:$('shareCode').value}).catch(()=>{})}catch{}}
+function copyCode(){const v=$('shareCode').value;v?copy(v,'📋 Code gekopieerd'):toast('Geen code om te kopiëren')}
+function importCode(){
+ try{const v=$('shareCode').value.trim();if(!v.startsWith('ELAB1:'))throw 0;const d=JSON.parse(decodeURIComponent(escape(atob(v.slice(6)))));if(!d.n||!Array.isArray(d.f))throw 0;
+  saved.push({id:Date.now(),name:String(d.n).slice(0,60),targetMl:+d.ml||60,targetNic:+d.nic||0,targetVg:+d.vg||70,nicType:d.t==='salts'?'salts':'freebase',flavors:d.f.slice(0,20).map(([n,q])=>({name:String(n).slice(0,60),pct:+q||0}))});
+  sv();$('shareCode').value='';toast('✅ Recept geïmporteerd')}catch{toast('❌ Ongeldige deelcode')}}
+
+function renderRecent(){$('recent').innerHTML=saved.map((r,i)=>[r,i]).sort((a,b)=>b[0].id-a[0].id).slice(0,4).map(([r,i])=>`<span class="chip" onclick="loadSaved(${i})">⚡ ${esc(r.name)}</span>`).join('')}
+function drawBottle(){
+ const c=calc(),seg=[[c.vgMl,'--ok'],[c.pgMl,'--ac'],[c.mixMl,'--tl'],[c.bMl,'--pk'],[c.flMl,'--am'],[c.nicMl,'--pu']],tot=seg.reduce((a,x)=>a+(x[0]||0),0)||1;let y=138;
+ const rects=seg.map(([v,col])=>{const h=v/tot*96;y-=h;return`<rect x="20" y="${y.toFixed(1)}" width="80" height="${h.toFixed(1)}" style="fill:var(${col})"/>`}).join('');
+ $('bottle').innerHTML=`<svg viewBox="0 0 120 150" width="150" style="filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))"><defs><clipPath id="bc"><rect x="20" y="42" width="80" height="96" rx="14"/></clipPath></defs><rect x="46" y="14" width="28" height="30" rx="4" fill="none" stroke="var(--mu)" stroke-width="2"/><rect x="42" y="4" width="36" height="12" rx="4" style="fill:var(--ac)"/><g clip-path="url(#bc)"><rect x="20" y="42" width="80" height="96" fill="rgba(148,163,184,.12)"/>${rects}<rect x="26" y="42" width="8" height="96" fill="#fff" opacity=".18"/></g><rect x="20" y="42" width="80" height="96" rx="14" fill="none" stroke="var(--mu)" stroke-width="2"/><text x="60" y="96" text-anchor="middle" font-size="16" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:3px">${c.ml} ml</text></svg>`}
+
+/* Autocomplete */
+const COMMON=['Capella - Sweet Strawberry','Capella - Vanilla Custard V2','Capella - Golden Pineapple','Capella - Juicy Peach','Capella - Double Apple','Capella - Blueberry Extra','Capella - Watermelon','Capella - Cool Mint','Capella - French Vanilla V2','Capella - Sugar Cookie V2','Capella - Raspberry','Capella - Lemon Sicily','TPA - Bavarian Cream','TPA - Peppermint','TPA - Vanilla Swirl','TPA - Strawberry Ripe','TPA - Marshmallow','TPA - Cheesecake Graham Crust','TPA - Banana Cream','TPA - Vanilla Bean Ice Cream','TPA - Menthol Arctic','Inawera - Custard'];
+const acEl=$('ac');let acL=[],acI=0,acPick=null;
+const acHide=()=>{acEl.style.display='none';acL=[]};
+function acPaint(){acEl.innerHTML=acL.map((x,i)=>`<div class="${i===acI?'on':''}" data-i="${i}"><span>${esc(x.n)}</span><small>${esc(x.m||'')}</small></div>`).join('')}
+function acSrc(t){
+ if(t.closest?.('#flavors')&&t.type==='text'){const row=t.closest('.fr'),i=[...document.querySelectorAll('#flavors .fr')].indexOf(row),have=new Set(inventory.map(x=>x.name));
+  return{items:[...inventory.map(x=>({n:x.name,m:`${x.rec?x.rec+'% · ':''}${x.ml} ml`})),...COMMON.filter(n=>!have.has(n)).map(n=>({n,m:'nieuw'}))],pick:n=>{t.value=n;updFlavor(i,'name',n)}}}
+ if(t.id==='invName'){const have=new Set(inventory.map(x=>x.name));return{items:COMMON.filter(n=>!have.has(n)).map(n=>({n,m:'suggestie'})),pick:n=>{t.value=n}}}
+ if(t.id==='recipeName')return{items:saved.map((r,i)=>({n:r.name,m:'📖 laden',i})),pick:(n,x)=>{applyR(saved[x.i])}};
+ if(t.id==='steepName')return{items:[...saved.map(r=>({n:r.name,m:'recept'})),...presets.map(r=>({n:r.name,m:'idee'}))],pick:n=>{t.value=n}};
+ return null}
+function acRun(t){
+ const src=acSrc(t);if(!src)return acHide();
+ const q=t.value.toLowerCase().split(/\s+/).filter(Boolean);
+ acL=src.items.map(it=>{const n=it.n.toLowerCase();let sc=0;for(const w of q){const p=n.indexOf(w);if(p<0)return null;sc+=p}return{...it,sc}}).filter(Boolean).sort((a,b)=>a.sc-b.sc).slice(0,8);
+ if(!acL.length||(acL.length===1&&acL[0].n.toLowerCase()===t.value.trim().toLowerCase()))return acHide();
+ const r=t.getBoundingClientRect();Object.assign(acEl.style,{display:'block',left:r.left+'px',top:r.bottom+4+'px',width:Math.max(r.width,250)+'px'});
+ acI=0;acPick=src.pick;acPaint()}
+const acChoose=i=>{const x=acL[i];if(!x)return;acPick(x.n,x);acHide()};
+document.addEventListener('input',e=>acRun(e.target));
+document.addEventListener('focusin',e=>{if(!e.target.value)acRun(e.target)});
+document.addEventListener('focusout',()=>setTimeout(acHide,150));
+document.addEventListener('scroll',acHide,true);
+acEl.addEventListener('mousedown',e=>{e.preventDefault();const d=e.target.closest('[data-i]');if(d)acChoose(+d.dataset.i)});
+document.addEventListener('keydown',e=>{
+ if(acEl.style.display!=='block')return;
+ if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();acI=(acI+(e.key==='ArrowDown'?1:-1)+acL.length)%acL.length;acPaint()}
+ else if(e.key==='Enter'){e.preventDefault();acChoose(acI)}else if(e.key==='Escape')acHide()});
+
+let bases=load('vape_bases',[{id:11,kind:'vg',name:'VG (glycerine)',ml:500},{id:12,kind:'pg',name:'PG (propyleenglycol)',ml:500},{id:13,kind:'mix',name:'Base 70VG/30PG',ml:250,vg:70},{id:14,kind:'nic',name:'Nic shot 20mg 50VG/50PG',ml:100,vg:50,mg:20,nt:'freebase'}]),bNt='freebase';
+const KIND={vg:['🟢','Pure VG'],pg:['🔵','Pure PG'],mix:['🧪','Voorgemengd'],nic:['💜','Nicotine']},LOW={vg:100,pg:100,mix:100,nic:20};
+['nicBaseMg','nicBaseVg'].forEach(id=>$(id).addEventListener('input',()=>{$('nicSel').value=''}));
+function bKindUI(){const k=$('bKind').value;$('bVg').style.display=k==='mix'||k==='nic'?'':'none';$('bMg').style.display=k==='nic'?'':'none';$('bNt').style.display=k==='nic'?'':'none'}
+function bSetNt(t){bNt=t;$('bnf').className=t==='freebase'?'fb':'';$('bns').className=t==='salts'?'salt':''}
+function addBase(){
+ const k=$('bKind').value,ml=parseFloat($('bMl').value)||0,vg=parseFloat($('bVg').value),mg=parseFloat($('bMg').value);let name=$('bName').value.trim();
+ if((k==='mix'||k==='nic')&&!(vg>=0&&vg<=100))return toast('⚠️ Vul een VG-percentage in (0–100)');
+ if(k==='nic'&&!(mg>0))return toast('⚠️ Vul de nicotinesterkte in (mg/ml)');
+ if(!name)name=k==='nic'?`Nic ${mg}mg ${vg}VG/${100-vg}PG`:k==='mix'?`Base ${vg}VG/${100-vg}PG`:k==='vg'?'VG':'PG';
+ bases.push({id:Date.now(),kind:k,name,ml,...(k==='mix'||k==='nic'?{vg}:{}),...(k==='nic'?{mg,nt:bNt}:{})});
+ ['bName','bMl','bVg','bMg'].forEach(i=>$(i).value='');renderBases();toast('✅ Toegevoegd aan basisvoorraad')}
+const updBase=(i,v)=>{bases[i].ml=parseFloat(v)||0;renderBases()};
+const rmBase=i=>{bases.splice(i,1);renderBases()};
+function renderBases(){
+ store('vape_bases',bases);$('baseCount').textContent=`${bases.length} items`;
+ const mx=Math.max(1,...bases.map(b=>b.ml));
+ $('bases').innerHTML=bases.map((b,i)=>{
+  const[ic,l]=KIND[b.kind],det=b.kind==='nic'?` · ${b.mg} mg/ml · ${b.vg}VG/${100-b.vg}PG · ${b.nt==='salts'?'salt':'freebase'}`:b.kind==='mix'?` · ${b.vg}VG/${100-b.vg}PG`:'',low=b.ml<=LOW[b.kind];
+  return`<div class="it" style="flex-wrap:wrap"><div style="flex:1;min-width:0"><b style="font-size:.86rem">${ic} ${esc(b.name)}</b><div class="sub">${l}${det}</div><div class="bar" style="height:6px;margin:6px 0 0"><div style="width:${b.ml/mx*100}%;background:${low?'var(--no)':'var(--ok)'}"></div></div>${low?'<span class="bg bw">⚠️ Bijna op</span>':''}</div><div style="display:flex;align-items:center;gap:6px"><input type="number" value="${b.ml}" onchange="updBase(${i},this.value)" style="width:76px;text-align:center"><span class="sub">ml</span><button class="x" onclick="rmBase(${i})">✕</button></div></div>`}).join('')||'<p class="note">Nog geen basisvoorraad.</p>';
+ const opt=(k,cur,first)=>`<option value="">${first}</option>`+bases.filter(b=>b.kind===k).map(b=>`<option value="${b.id}"${String(b.id)===cur?' selected':''}>${esc(b.name)} (${b.ml} ml)</option>`).join('');
+ const ns=$('nicSel').value,ms=$('mixSel').value;$('nicSel').innerHTML=opt('nic',ns,'Handmatig (geen voorraad)');$('mixSel').innerHTML=opt('mix',ms,'Geen (pure VG/PG)');
+ calculate()}
+function pickNic(){const b=bases.find(x=>String(x.id)===$('nicSel').value);if(!b)return calculate();$('nicBaseMg').value=b.mg;$('nicBaseVg').value=b.vg;setNicType(b.nt||'freebase')}
+function showAfter(){
+ const c=calc(),p=[];
+ [['vg',c.vgMl,'VG'],['pg',c.pgMl,'PG']].forEach(([k,v,l])=>{const s=bases.filter(b=>b.kind===k);if(s.length)p.push(`${l} ${Math.max(0,s.reduce((a,b)=>a+b.ml,0)-v).toFixed(0)} ml`)});
+ const px=bases.find(b=>b.kind==='mix'&&String(b.id)===$('mixSel').value);if(px)p.push(`premix ${Math.max(0,px.ml-c.mixMl).toFixed(0)} ml`);
+ const nb=bases.find(b=>b.kind==='nic'&&String(b.id)===$('nicSel').value);if(nb)p.push(`nic ${Math.max(0,nb.ml-c.nicMl).toFixed(0)} ml`);
+ $('afterMix').innerHTML=p.length?`🧴 Voorraad na dit mengsel: ${p.join(' · ')}`:''}
+function takeKind(kind,ml,label,miss){
+ if(!bases.some(x=>x.kind===kind))return;let need=ml;
+ for(const b of bases.filter(x=>x.kind===kind&&x.ml>0)){const t=Math.min(b.ml,need);b.ml=+(b.ml-t).toFixed(2);need-=t;if(need<=1e-9)break}
+ if(need>.05)miss.push(`${label} (${need.toFixed(1)} ml tekort)`)}
+function useBases(miss){blend.forEach(x=>{const L=liq(x.id);if(!L||!(x.ml>0))return;if(L.ml<x.ml)miss.push(`${L.name} (${(x.ml-L.ml).toFixed(1)} ml tekort)`);L.ml=Math.max(0,+(L.ml-x.ml).toFixed(2))});store('vape_liquids',liquids);
+ const c=calc(),nb=bases.find(b=>b.kind==='nic'&&String(b.id)===$('nicSel').value),px=bases.find(b=>b.kind==='mix'&&String(b.id)===$('mixSel').value);
+ if(nb&&c.nicMl>0){const t=Math.min(nb.ml,c.nicMl);nb.ml=+(nb.ml-t).toFixed(2);if(c.nicMl-t>.05)miss.push(`${nb.name} (${(c.nicMl-t).toFixed(1)} ml tekort)`)}
+ if(px&&c.mixMl>0)px.ml=Math.max(0,+(px.ml-c.mixMl).toFixed(2));
+ takeKind('vg',c.vgMl,'VG',miss);takeKind('pg',c.pgMl,'PG',miss);renderBases()}
+
+let liquids=load('vape_liquids',[{id:21,name:'Strawberry Bavarian Custard (voorbeeld)',ml:40,nic:3,vg:70,nt:'freebase',flavors:[{name:'Capella - Sweet Strawberry',pct:6},{name:'TPA - Bavarian Cream',pct:3}],note:'Voorbeeldliquid: pas aan of verwijder',date:today(),cpm:0.12}]),blend=[],editLiqId=null,lNt='freebase';
+const liq=id=>liquids.find(l=>String(l.id)===String(id)),svLiq=()=>store('vape_liquids',liquids);
+const parseFl=t=>t.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>{const m=x.match(/^(.*?)[,:;\s]+(\d+(?:[.,]\d+)?)\s*%?$/);return m?{name:m[1].trim(),pct:parseFloat(m[2].replace(',','.'))}:{name:x,pct:0}});
+function aromaProfile(){const c=calc(),m={};blend.forEach(x=>{const L=liq(x.id);if(L&&x.ml>0)L.flavors.forEach(f=>{m[f.name]=(m[f.name]||0)+x.ml*f.pct/100})});flavors.forEach(f=>{if(f.name)m[f.name]=(m[f.name]||0)+c.ml*(+f.pct||0)/100});return Object.entries(m).map(([name,v])=>({name,pct:+(v/c.ml*100).toFixed(2)}))}
+function lSetNt(t){lNt=t;$('lnf').className=t==='freebase'?'fb':'';$('lns').className=t==='salts'?'salt':''}
+function renderBlend(){$('blend').innerHTML=blend.map((x,i)=>`<div class="fr"><select style="flex:2" onchange="setBlend(${i},'id',this.value)">${liquids.map(l=>`<option value="${l.id}"${String(l.id)===String(x.id)?' selected':''}>${esc(l.name)} (${l.ml} ml)</option>`).join('')}</select><input type="number" value="${x.ml}" min="0" step="1" oninput="setBlend(${i},'ml',parseFloat(this.value)||0)"><span class="sub">ml</span><button class="x" onclick="rmBlend(${i})">✕</button></div>`).join('')||'<p class="note">Nog geen liquids toegevoegd.</p>'}
+function addBlend(){if(!liquids.length)return toast('⚠️ Voeg eerst liquids toe in de tab Liquids');blend.push({id:liquids[0].id,ml:10});renderBlend();calculate()}
+const setBlend=(i,k,v)=>{blend[i][k]=k==='id'?+v:v;calculate()};
+const rmBlend=i=>{blend.splice(i,1);renderBlend();calculate()};
+function renderLiquids(){
+ const q=($('lq').value||'').toLowerCase();$('liqCount').textContent=`${liquids.length} liquids · ${liquids.reduce((a,l)=>a+l.ml,0).toFixed(0)} ml`;
+ $('liqs').innerHTML=liquids.map((l,i)=>[l,i]).filter(([l])=>!q||(l.name+' '+l.flavors.map(f=>f.name).join(' ')).toLowerCase().includes(q)).map(([l,i])=>`<div class="it" style="flex-wrap:wrap"><div style="flex:1;min-width:0"><b style="font-size:.88rem">${esc(l.name)}</b><div class="sub">${l.nic} mg/ml · ${l.vg}VG/${100-l.vg}PG · ${l.nt==='salts'?'salt':'freebase'} · ${esc(l.date||'')}</div><div class="sub" style="color:var(--am)">${l.flavors.map(f=>`${esc(f.name)} ${f.pct}%`).join(' · ')||"geen aroma's"}</div>${l.note?`<div class="sub">📝 ${esc(l.note)}</div>`:''}</div><div style="display:flex;align-items:center;gap:6px"><input type="number" value="${l.ml}" onchange="updLiq(${i},this.value)" style="width:76px;text-align:center"><span class="sub">ml</span></div><div style="flex-basis:100%;display:flex;gap:6px;margin-top:8px"><button class="b2 sm" style="flex:1" onclick="liqToRecipe(${i})">✏️ Laden als recept</button><button class="b2 sm" style="flex:1" onclick="liqToBlend(${i})">🍶 In mix</button><button class="b2 sm" onclick="liqEdit(${i})">⚙️</button><button class="x" onclick="rmLiq(${i})">✕</button></div></div>`).join('')||'<p class="note">Geen liquids gevonden.</p>'}
+const updLiq=(i,v)=>{liquids[i].ml=parseFloat(v)||0;svLiq();renderLiquids();renderBlend();calculate()};
+function rmLiq(i){const id=liquids[i].id;liquids.splice(i,1);blend=blend.filter(b=>String(b.id)!==String(id));svLiq();renderLiquids();renderBlend();calculate()}
+function liqToRecipe(i){const l=liquids[i];applyR({name:l.name+' v2',targetMl:l.ml||60,targetNic:l.nic,targetVg:l.vg,nicType:l.nt,flavors:structuredClone(l.flavors),blend:[]});toast('✏️ Liquid geladen als nieuw recept')}
+function liqToBlend(i){const l=liquids[i];blend.push({id:l.id,ml:Math.min(l.ml,20)||10});renderBlend();calculate();switchTab('calc');toast(`🍶 ${l.name} toegevoegd aan de mix`)}
+function liqFromRecipe(){const c=calc();$('lName2').value=$('recipeName').value;$('lMl').value=c.ml;$('lNic').value=c.nic;$('lVg').value=c.vg;lSetNt(nicType);$('lFl').value=aromaProfile().map(f=>`${f.name}, ${f.pct}`).join('\n')}
+function liqEdit(i){const l=liquids[i];editLiqId=l.id;$('lName2').value=l.name;$('lMl').value=l.ml;$('lNic').value=l.nic;$('lVg').value=l.vg;lSetNt(l.nt||'freebase');$('lFl').value=l.flavors.map(f=>`${f.name}, ${f.pct}`).join('\n');$('lNote').value=l.note||'';$('lAdd').textContent='💾 Wijzigingen opslaan';scrollTo({top:0,behavior:'smooth'})}
+function addLiquid(){
+ const name=$('lName2').value.trim();if(!name)return toast('⚠️ Geef de liquid een naam');
+ const o={name,ml:parseFloat($('lMl').value)||0,nic:parseFloat($('lNic').value)||0,vg:Math.min(100,Math.max(0,parseFloat($('lVg').value)||0)),nt:lNt,flavors:parseFl($('lFl').value),note:$('lNote').value.trim()};
+ if(editLiqId){const l=liq(editLiqId);if(l)Object.assign(l,o)}else liquids.unshift({id:Date.now(),date:today(),cpm:0,...o});
+ editLiqId=null;['lName2','lMl','lFl','lNote'].forEach(i=>$(i).value='');$('lNic').value=0;$('lVg').value=70;$('lAdd').textContent='+ Toevoegen aan database';
+ svLiq();renderLiquids();renderBlend();calculate();toast('✅ Opgeslagen in database')}
+function addLiquidFromBatch(){const ml=num('targetMl');liquids.unshift({id:Date.now()+2,name:$('recipeName').value||'Batch',ml,nic:num('targetNic'),vg:num('targetVg'),nt:nicType,flavors:aromaProfile(),note:'',date:today(),cpm:ml?lastCost/ml:0});svLiq();renderLiquids();renderBlend()}
+
+let bottles=load('vape_bottles',[]);
+const f1=v=>isFinite(v)?v.toFixed(1):'–';
+function renderBottle(){
+ const keep=id=>$(id).value;const p=keep('fPre'),sr=keep('fSrc'),lq=keep('fLiq');
+ $('fPre').innerHTML='<option value="">Nieuw / handmatig</option>'+bottles.map(b=>`<option value="${b.id}"${String(b.id)===p?' selected':''}>${esc(b.name)}</option>`).join('');
+ $('fSrc').innerHTML='<option value="man">VG % handmatig</option><option value="rec">Huidig recept</option>'+liquids.map(l=>`<option value="L${l.id}"${'L'+l.id===sr?' selected':''}>${esc(l.name)}</option>`).join('');
+ if(sr&&[...$('fSrc').options].some(o=>o.value===sr))$('fSrc').value=sr;
+ $('fLiq').innerHTML='<option value="">Kies liquid...</option>'+liquids.map(l=>`<option value="${l.id}"${String(l.id)===lq?' selected':''}>${esc(l.name)} (${l.ml} ml)</option>`).join('');
+ fCalc()}
+function fSave(){
+ const name=$('fName').value.trim()||($('fPre').selectedOptions[0]?.text);if(!name||$('fPre').value===''&&!$('fName').value.trim())return toast('⚠️ Geef het flesje een naam');
+ const o={name,C:num('fC'),W:num('fW'),B:num('fB'),T:num('fT'),Mx:num('fMax'),Kv:num('fKv'),Kh:num('fKh')},ex=bottles.find(b=>String(b.id)===$('fPre').value&&b.name===name);
+ if(ex)Object.assign(ex,o);else bottles.push({id:Date.now(),...o});
+ store('vape_bottles',bottles);renderBottle();toast('✅ Flesje opgeslagen')}
+function fLoad(){const b=bottles.find(x=>String(x.id)===$('fPre').value);if(!b)return;$('fName').value=b.name;$('fC').value=b.C||'';$('fW').value=b.W;$('fB').value=b.B;$('fT').value=b.T||'';$('fMax').value=b.Mx||'';$('fKv').value=b.Kv||'';$('fKh').value=b.Kh||'';fCalc()}
+function fDel(){const i=bottles.findIndex(x=>String(x.id)===$('fPre').value);if(i<0)return toast('Kies eerst een opgeslagen flesje');bottles.splice(i,1);store('vape_bottles',bottles);renderBottle()}
+function fVgPct(){const sr=$('fSrc').value;let vg=num('fVg',70);if(sr==='rec')vg=num('targetVg');else if(sr.startsWith('L')){const l=liq(sr.slice(1));if(l)vg=l.vg}$('fVg').value=vg;$('fVg').disabled=sr!=='man';return vg}
+let fEst=0;
+function fCalc(){
+ const C=num('fC'),H=num('fH'),W=num('fW'),B=num('fB'),G=num('fG'),T=num('fT'),Kv=num('fKv'),Kh=num('fKh'),Mx=num('fMax'),Tg=num('fTarget'),Pv=num('fPrev');
+ const vg=fVgPct(),dens=vg/100*D.VG+(1-vg/100)*D.PG,he=Math.max(0,H-B),ri=Math.max(0,C/(2*Math.PI)-W),m=[];
+ if(C>0&&H>0)m.push(['📐 Geometrie (cilinder)',Math.PI*ri*ri*he/1000]);
+ if(Kv>0&&Kh>B&&H>0)m.push(['🎯 Kalibratie (lineair)',Kv*he/(Kh-B)]);
+ if(G>0&&T>0&&G>T)m.push(['⚖️ Gewicht (netto ÷ dichtheid)',(G-T)/dens]);
+ const vals=m.map(x=>x[1]),est=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;fEst=est;
+ const spread=vals.length>1?(Math.max(...vals)-Math.min(...vals))/est:0,pi=Math.PI*ri*ri/1000;
+ $('fStats').innerHTML=[[est?f1(est)+' ml':'–','geschat'],[est?f1(est*dens)+' g':'–','netto'],[dens.toFixed(3),'g/ml'],[pi?pi.toFixed(2):'–','ml per mm']].map(([v,l])=>`<div class="st"><b>${v}</b><span>${l}</span></div>`).join('');
+ let h=m.map(([l,v])=>`<div class="rr"><span>${l}</span><span class="rv">${f1(v)} ml</span></div>`).join('')||'<p class="note" style="padding-top:8px">Vul omtrek + hoogte, een kalibratie of bruto- en leeggewicht in.</p>';
+ if(est&&Mx>0)h+=`<div class="rr"><span>Vulling</span><span class="rv">${Math.min(100,est/Mx*100).toFixed(0)}% van ${Mx} ml</span></div><div class="rr"><span>Ruimte over</span><span class="rv">${f1(Math.max(0,Mx-est))} ml</span></div>`;
+ if(est&&Tg>est){const add=Tg-est;h+=`<div class="rr"><span>Aanvullen tot ${Tg} ml</span><span class="rv" style="color:var(--ok)">+${f1(add)} ml / ${f1(add*dens)} g</span></div>`;if(G>0)h+=`<div class="rr"><span>Wegen tot brutogewicht</span><span class="rv">${(G+add*dens).toFixed(2)} g</span></div>`}
+ if(Pv>G&&G>0)h+=`<div class="rr"><span>Verbruikt sinds vorige weging</span><span class="rv">${f1((Pv-G)/dens)} ml / ${(Pv-G).toFixed(2)} g</span></div>`;
+ $('fRes').innerHTML=h;
+ const w=[];if(spread>.1)w.push(`⚠️ De methodes wijken ${(spread*100).toFixed(0)}% van elkaar af: controleer glasdikte, bodemdikte, tarra en of het flesje cilindrisch is. Kalibreren helpt.`);
+ if(Mx>0&&est>Mx*1.02)w.push('⚠️ Het geschatte volume is groter dan het maximum van het flesje.');
+ $('fWarn').innerHTML=w.map(x=>`<div>${x}</div>`).join('');
+ const fr=Mx>0&&est?Math.min(1,est/Mx):null;
+ $('fViz').innerHTML=fr==null?'':`<svg viewBox="0 0 80 130" width="90" style="margin-bottom:10px;filter:drop-shadow(0 8px 16px rgba(0,0,0,.3))"><defs><clipPath id="fc"><rect x="12" y="34" width="56" height="90" rx="10"/></clipPath></defs><rect x="30" y="8" width="20" height="28" rx="3" fill="none" stroke="var(--mu)" stroke-width="2"/><rect x="28" y="2" width="24" height="9" rx="3" style="fill:var(--ac)"/><g clip-path="url(#fc)"><rect x="12" y="${124-90*fr}" width="56" height="${90*fr}" style="fill:var(--pk)" opacity=".85"/></g><rect x="12" y="34" width="56" height="90" rx="10" fill="none" stroke="var(--mu)" stroke-width="2"/><text x="40" y="84" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" style="paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:3px">${f1(est)} ml</text></svg>`}
+function fSync(){const l=liq($('fLiq').value);if(!l)return toast('⚠️ Kies eerst een liquid');if(!fEst)return toast('⚠️ Er is nog geen schatting');l.ml=+fEst.toFixed(1);svLiq();renderLiquids();renderBlend();renderBottle();calculate();toast(`💾 ${l.name}: ${l.ml} ml opgeslagen`)}
+
+let gemImg=null,lraf=0;
+const TT={art:'DIY E-LIQUID LAB',tech:'** DIY LAB TECH **',vintage:'~ APOTHECARY DIY ~',inverted:'DIY E-LIQUID LAB',grid:'[ DIY LAB SPECIFICATION ]',standard:'PREMIUM DIY LAB'},B4=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+const CRC=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return b=>{let c=-1;for(const v of b)c=t[(c^v)&255]^(c>>>8);return(c^-1)>>>0}})();
+async function pngDpi(blob){const u=new Uint8Array(await blob.arrayBuffer()),ch=new Uint8Array(21),dv=new DataView(ch.buffer);dv.setUint32(0,9);ch.set([112,72,89,115],4);dv.setUint32(8,11811);dv.setUint32(12,11811);ch[16]=1;dv.setUint32(17,CRC(ch.subarray(4,17)));const o=new Uint8Array(u.length+21);o.set(u.subarray(0,33));o.set(ch,33);o.set(u.subarray(33),54);return new Blob([o],{type:'image/png'})}
+function labelSpec(){const z=$('lblSize').value;let mw,mh;if(z==='custom'){mw=Math.min(200,Math.max(10,num('lblW',50)));mh=Math.min(200,Math.max(10,num('lblH',50)))}else[mw,mh]=z.split('x').map(Number);return{mw,mh,W:Math.round(mw/25.4*300),H:Math.round(mh/25.4*300)}}
+function post(cv,mode){
+ if(mode==='color')return cv;const x=cv.getContext('2d'),d=x.getImageData(0,0,cv.width,cv.height),a=d.data,W=cv.width;
+ for(let i=0;i<a.length;i+=4){let l=.299*a[i]+.587*a[i+1]+.114*a[i+2];if(mode==='bw'){const p=i>>2,t=(B4[((Math.floor(p/W)&3)<<2)+((p%W)&3)]+.5)/16*255;l=l>t?255:0}a[i]=a[i+1]=a[i+2]=l}
+ x.putImageData(d,0,0);return cv}
+function drawLabel(W,H,mode){
+ const th=$('bgTheme').value,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+ if(gemImg){const k=Math.max(W/gemImg.width,H/gemImg.height),dw=gemImg.width*k,dh=gemImg.height*k;x.fillStyle='#fff';x.fillRect(0,0,W,H);x.drawImage(gemImg,(W-dw)/2,(H-dh)/2,dw,dh);return post(cv,mode)}
+ const s=Math.min(W,H)/600*(H<W?1.3:1),m=Math.round(Math.min(W,H)*.045),c=calc(),art=th==='art',pr=blend.length?aromaProfile():flavors.filter(f=>f.name).map(f=>({name:f.name,pct:f.pct}));
+ const nic=num('targetNic'),pct=(nic/10).toLocaleString('nl-BE',{maximumFractionDigits:2}),name=($('recipeName').value||'Custom DIY').toUpperCase(),o=$('lblOwner').value.trim(),bt=$('lblBatch').value.trim(),warn=$('lblWarn').checked&&nic>0&&H>=300;
+ if(art)x.drawImage(bgSource(W,H),0,0);else{x.fillStyle='#fff';x.fillRect(0,0,W,H)}
+ x.strokeStyle='#000';x.textBaseline='alphabetic';
+ const F=px=>{x.font=`bold ${Math.max(8,Math.round(px*s))}px "Courier New",monospace`};
+ const T=(t,px,y,al='center',col='#000')=>{F(px);x.fillStyle=col;x.textAlign=al;x.fillText(t,al==='left'?m*1.7:al==='right'?W-m*1.7:W/2,y)};
+ const fit=(t,px,mw)=>{let p=px;F(p);while(p>10&&x.measureText(t).width>mw){p--;F(p)}return p};
+ const panel=(y,h,fill)=>{x.fillStyle=fill||(art?'rgba(255,255,255,.9)':'#fff');x.beginPath();x.roundRect(m,y,W-2*m,Math.max(4,h),art?14*s:0);x.fill();x.lineWidth=3*s;x.stroke()};
+ if(!art){x.lineWidth=(th==='grid'?4:6)*s;x.strokeRect(m/2,m/2,W-m,H-m);if(th==='vintage'){x.lineWidth=2*s;x.strokeRect(m,m,W-2*m,H-2*m)}}
+ let y=Math.round(m*1.1);const hh=118*s,hc=th==='inverted'?'#fff':'#000';
+ panel(y,hh,th==='inverted'?'#000':null);T(TT[th],19,y+34*s,'center',hc);T(name,fit(name,34,W-4*m),y+86*s,'center',hc);
+ const wh=warn?64*s:0,fh=(o||bt?88:58)*s,wy=H-Math.round(m*1.1)-wh,fy=(warn?wy-8*s:H-Math.round(m*1.1))-fh,my=y+hh+8*s;
+ panel(my,fy-8*s-my);let yy=my+42*s;
+ T(nic>0?`${nic} MG/ML  (${pct}%)`:'NICOTINEVRIJ 0 MG/ML',30,yy);yy+=32*s;
+ T(`${c.vg}VG / ${c.pg}PG  |  ${c.ml} ML  |  ${nicType==='salts'?'NIC SALT':'FREEBASE'}`,16,yy);yy+=14*s;
+ x.lineWidth=2*s;x.beginPath();x.moveTo(m*1.7,yy);x.lineTo(W-m*1.7,yy);x.stroke();yy+=26*s;
+ pr.forEach(f=>{if(yy>fy-18*s)return;T('• '+f.name,15,yy,'left');T(f.pct+'%',15,yy,'right');yy+=24*s});
+ panel(fy,fh);T(`DATUM ${today()}  |  STEEP ${$('lblSteep').value||0}D`,15,fy+34*s);
+ if(o||bt)T([o&&'VOOR: '+o.toUpperCase(),bt&&bt.toUpperCase()].filter(Boolean).join('  |  '),13,fy+66*s);
+ if(warn){
+  x.fillStyle='#000';x.fillRect(m,wy,W-2*m,wh);const tx=m+14*s,ty=wy+wh/2;
+  x.fillStyle='#fff';x.beginPath();x.moveTo(tx+19*s,ty-20*s);x.lineTo(tx+39*s,ty+16*s);x.lineTo(tx-1*s,ty+16*s);x.closePath();x.fill();
+  x.fillStyle='#000';x.fillRect(tx+17*s,ty-8*s,4*s,15*s);x.fillRect(tx+17*s,ty+9*s,4*s,4*s);
+  x.fillStyle='#fff';x.textAlign='left';const lw=W-2*m-62*s;
+  [['BEVAT NICOTINE - ZEER VERSLAVEND',.4],['18+  -  BUITEN BEREIK VAN KINDEREN',.8]].forEach(([t,f])=>{F(fit(t,14,lw));x.fillText(t,m+54*s,wy+wh*f)})}
+ return post(cv,mode)}
+function renderLabel(){
+ const sp=labelSpec(),cv=$('lblCanvas'),src=drawLabel(sp.W,sp.H,$('lblMode').value);
+ $('lblCust').style.display=$('lblSize').value==='custom'?'':'none';
+ cv.width=sp.W;cv.height=sp.H;cv.getContext('2d').drawImage(src,0,0);cv.style.width=Math.min(sp.W*.7,560)+'px';
+ const rt=gemImg?Math.abs(gemImg.width/gemImg.height/(sp.mw/sp.mh)-1):0;
+ $('lblInfo').textContent=`${sp.mw} × ${sp.mh} mm · ${sp.W} × ${sp.H} px (300 dpi)`+(gemImg?(rt>.05?' · geïmporteerd etiket wordt bijgesneden: vraag Gemini om exact deze verhouding':' · geïmporteerd etiket'):'');
+ $('gPrompt').value=gemPrompt()}
+function updateLabel(){if(!$('tab-label').classList.contains('on'))return;cancelAnimationFrame(lraf);lraf=requestAnimationFrame(renderLabel)}
+function gemPrompt(){
+ const{mw,mh,W,H}=labelSpec(),c=calc(),pr=blend.length?aromaProfile():flavors.filter(f=>f.name).map(f=>({name:f.name,pct:f.pct})),nic=num('targetNic'),pct=(nic/10).toLocaleString('nl-BE',{maximumFractionDigits:2});
+ const name=$('recipeName').value||'Custom DIY',o=$('lblOwner').value.trim(),bt=$('lblBatch').value.trim(),warn=$('lblWarn').checked&&nic>0,full=$('gMode').value==='full',st=$('gArt').value;
+ const tn={tobacco:'tabak, rook en hout',fruit:'sappig fruit en bessen',cream:'romige custard, room en vanille',frost:'ijs, menthol en frisse kristallen',drinks:'drankjes, koffiebonen en bubbels',toxic:'futuristische laboratoriumsfeer'}[artThemes()[0]];
+ const names=pr.map(f=>f.name.replace(/^[\w.]+\s*-\s*/,'')).join(', ')||'zoete smaken',or=mw>mh?'liggend':mw<mh?'staand':'vierkant';
+ const dim=[`- Fysiek formaat: ${mw} x ${mh} mm (${or}), beeldverhouding ${mw}:${mh}.`,`- Resolutie: ${W} x ${H} pixels (300 dpi). Lever exact deze verhouding, zonder witte rand, zonder mockup, zonder flesje en zonder schaduw.`];
+ const kl=['- Uitsluitend grijstinten (zwart, wit en grijs), geen enkele kleur.','- Hoog contrast, geschikt voor een zwart-wit of thermische etikettenprinter. Gebruik duidelijke vlakken en lijnen en vermijd zeer fijne verlopen.'];
+ const beeld=`- Maak een originele ${st} in grijstinten die past bij de smaak (${tn}; aroma's: ${names}).`;
+ const tekst=[`- Naam (groot): ${name}`,nic>0?`- Nicotine (zeer prominent): ${nic} mg/ml (${pct}% nicotine), type ${nicType==='salts'?'nic salt':'freebase'}`:'- Nicotinevrij: 0 mg/ml',`- Verhouding: ${c.vg}VG / ${c.pg}PG`,`- Inhoud: ${c.ml} ml`,`- Aroma's: ${pr.map(f=>`${f.name} ${f.pct}%`).join(', ')||'geen'}`,`- Steep: ${$('lblSteep').value||0} dagen`,`- Datum: ${today()}`];
+ if(o)tekst.push('- Voor: '+o);if(bt)tekst.push('- Batch: '+bt);
+ if(warn)tekst.push('- Waarschuwing in een zwart vlak onderaan, met een wit gevarendriehoekje met uitroepteken: "Bevat nicotine. Zeer verslavend. Niet voor personen onder 18. Buiten bereik van kinderen."');
+ if(!full)return['Maak een achtergrondafbeelding voor een etiket van een zelfgemaakt e-liquid flesje. Lever een enkele PNG.','','AFMETINGEN',...dim,'','KLEUR',...kl,'','BEELD',beeld,'- Houd het midden van het beeld rustig en laag in contrast (ruim 60% van het oppervlak), zodat daar later tekst overheen kan.','- GEEN tekst, GEEN letters, GEEN cijfers, geen logo\'s, geen personen en geen merknamen in het beeld.'].join('\n');
+ return['Ontwerp een etiket voor een zelfgemaakt e-liquid flesje en lever het als een enkele PNG.','','AFMETINGEN',...dim,'- Houd 2 mm (ca. '+Math.round(2/25.4*300)+' px) veilige marge vrij van tekst.','','KLEUR',...kl,'','TEKST (letterlijk overnemen, niets toevoegen of verzinnen, elk cijfer controleren)',...tekst,'','BEELD',beeld,'- Gebruik het beeld als achtergrond of in een afgebakend vlak zodat alle tekst goed leesbaar blijft (donkere tekst op lichte vlakken of omgekeerd).','- Geen merklogo\'s, geen echte merknamen, geen personen en geen extra tekst in het beeld.','','LAYOUT','- Bovenaan de naam, daaronder de nicotinesterkte groot met het percentage, in het midden de aroma\'s, onderaan inhoud, VG/PG, datum en steep'+(warn?', en helemaal onderaan de waarschuwing.':'.'),'- Minimale tekstgrootte ca. 6 pt (ca. 25 px bij 300 dpi).','','Controleer ten slotte of alle tekst en cijfers exact overeenkomen met de gegevens hierboven.'].join('\n')}
+function copyPrompt(){copy($('gPrompt').value,'📋 Instructie gekopieerd')}
+function loadGem(e){const f=e.target.files[0];if(!f)return;const i=new Image(),r=new FileReader();i.onload=()=>{gemImg=i;updateLabel();toast('📥 Etiket geïmporteerd')};r.onload=()=>{i.src=r.result};r.readAsDataURL(f)}
+const clearGem=()=>{gemImg=null;updateLabel();toast('Import verwijderd')};
+function exportCanvas(cv,name){cv.toBlob(async b=>{if(!b)return toast('❌ Afbeelding maken mislukt');b=await pngDpi(b).catch(()=>b);if(typeof saveFile==='function')saveFile(name,b);else outFile(name,b)},'image/png')}
+function downloadPNG(){bump('labels');const sp=labelSpec();exportCanvas(drawLabel(sp.W,sp.H,$('lblMode').value),`label_${($('recipeName').value||'liquid').replace(/\W+/g,'_')}_${sp.mw}x${sp.mh}mm.png`)}
+async function printLabel(){
+ const sp=labelSpec(),u=drawLabel(sp.W,sp.H,$('lblMode').value).toDataURL('image/png');
+ let st=$('pgStyle');if(!st){st=document.createElement('style');st.id='pgStyle';document.head.appendChild(st)}
+ st.textContent=`@page{size:${sp.mw}mm ${sp.mh}mm;margin:0}`;
+ let pa=$('pa');if(!pa){pa=document.createElement('div');pa.id='pa';document.body.appendChild(pa)}
+ pa.innerHTML=`<img src="${u}" style="width:${sp.mw}mm;height:${sp.mh}mm;display:block">`;
+ await pa.firstChild.decode().catch(()=>{});
+ try{window.print()}catch{toast('⚠️ Printen is hier niet beschikbaar: download de PNG en print die op 100%')}}
+
+/* ===== v3.9 extra's ===== */
+function markBackup(){store('vape_lastbackup',Date.now())}
+let instEv=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e;['inst','inst2'].forEach(i=>{const b=$(i);if(b)b.style.display=''})});
+addEventListener('appinstalled',()=>{instEv=null;['inst','inst2'].forEach(i=>{const b=$(i);if(b)b.style.display='none'});toast('✅ App geïnstalleerd')});
+async function doInstall(){if(!instEv)return toast('Gebruik het browsermenu: Toevoegen aan startscherm');instEv.prompt();try{await instEv.userChoice}catch{}instEv=null;['inst','inst2'].forEach(i=>{const b=$(i);if(b)b.style.display='none'})}
+async function outFile(name,blob){
+ try{const f=new File([blob],name,{type:blob.type});if(navigator.canShare?.({files:[f]})&&matchMedia('(pointer:coarse)').matches){await navigator.share({files:[f],title:name});return}}catch(e){if(e&&e.name==='AbortError')return}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+
+/* Verras me */
+const ADJ=['Gouden','Mistige','Elektrische','Stille','Wilde','Zijden','Arctische','Zonnige','Fluwelen','Nachtelijke','Zachte','Gloeiende'],NOUN=['Dageraad','Wolk','Droom','Storm','Zomer','Fluistering','Cascade','Echo','Oase','Nevel','Symfonie','Rimpeling'];
+let lastSur=null;
+const pick=a=>a[Math.floor(Math.random()*a.length)],short=n=>String(n).replace(/^[\w.]+\s*-\s*/,'');
+function surprise(){bump('dice');
+ const pool=inventory.filter(i=>i.ml>=3);if(pool.length<2)return $('surpr').innerHTML='<p class="note">Voeg minstens twee aroma\'s met voorraad toe in de tab Voorraad.</p>';
+ const k=Math.min(pool.length,2+Math.floor(Math.random()*3)),ch=[...pool].sort(()=>Math.random()-.5).slice(0,k);
+ let fl=ch.map(L=>({name:L.name,pct:L.rec||3,L}));const tot=fl.reduce((a,f)=>a+f.pct,0);if(tot>14)fl.forEach(f=>f.pct=f.pct*14/tot);
+ fl=fl.map(f=>({name:f.name,pct:Math.max(.5,Math.round(f.pct*2)/2),L:f.L}));
+ const vg=pick([50,60,70,80]),st=Math.max(0,...fl.map(f=>f.L.steep||0)),name=`${pick(ADJ)} ${pick(NOUN)}`;
+ lastSur={name,targetMl:num('targetMl',60),targetNic:num('targetNic'),targetVg:vg,nicType,flavors:fl.map(f=>({name:f.name,pct:f.pct})),blend:[]};
+ $('surpr').innerHTML=`<div class="it" style="flex-direction:column;align-items:stretch;gap:6px"><b style="font-size:.95rem">✨ ${esc(name)}</b><div class="sub">${vg}VG / ${100-vg}PG · ${fl.reduce((a,f)=>a+f.pct,0)}% aroma${st?` · steep ±${st} dagen`:''}</div><div class="sub" style="color:var(--am)">${fl.map(f=>`${esc(short(f.name))} ${f.pct}%`).join(' · ')}</div><div class="g2" style="margin-top:6px"><button class="b2" onclick="surprise()">🎲 Opnieuw</button><button class="b1" onclick="applyR(lastSur)">✏️ Laad in calculator</button></div></div>`}
+
+/* Receptvergelijker */
+function recCost(r){
+ const ml=r.targetMl||60,bm=num('nicBaseMg',20)||20,nicMl=ml*(r.targetNic||0)/bm,flMl=r.flavors.reduce((a,f)=>a+ml*(+f.pct||0)/100,0),rest=Math.max(0,ml-nicMl-flMl),v=(r.targetVg||0)/100;
+ let c=nicMl*price.nic/10+rest*(v*price.vg+(1-v)*price.pg)/1000;
+ r.flavors.forEach(f=>{const L=findInv(f.name);c+=ml*(+f.pct||0)/100*(L&&L.price&&L.size?L.price/L.size:P.fl)});return c}
+function renderCmp(){
+ const o=saved.map((r,i)=>`<option value="${i}">${esc(r.name)}</option>`).join('');
+ [['cmpA',0],['cmpB',1]].forEach(([id,d])=>{const e=$(id),v=e.value;e.innerHTML=o;e.value=v!==''&&saved[v]?v:String(Math.min(d,saved.length-1))});
+ const a=saved[+$('cmpA').value],b=saved[+$('cmpB').value];if(!a||!b||saved.length<2){$('cmpOut').innerHTML='<p class="note">Sla minstens twee recepten op om ze te vergelijken.</p>';return}
+ const sum=r=>r.flavors.reduce((x,f)=>x+(+f.pct||0),0),ca=recCost(a),cb=recCost(b),ra=[],names=[...new Set([...a.flavors,...b.flavors].map(f=>f.name).filter(Boolean))];
+ const row=(l,x,y,d)=>`<div class="rr"><span>${l}</span><span class="rv">${x} <small style="color:var(--mu)">→</small> ${y}${d?` <small style="color:${d>0?'var(--am)':'var(--ac)'}">${d>0?'+':''}${+d.toFixed(2)}</small>`:''}</span></div>`;
+ const g=(r,n)=>(r.flavors.find(f=>f.name===n)||{pct:0}).pct;
+ $('cmpOut').innerHTML=`<div class="rc">${row('Nicotine (mg)',a.targetNic,b.targetNic,b.targetNic-a.targetNic)}${row('VG %',a.targetVg,b.targetVg,b.targetVg-a.targetVg)}${row('Volume (ml)',a.targetMl,b.targetMl,b.targetMl-a.targetMl)}${row('Aroma totaal %',+sum(a).toFixed(1),+sum(b).toFixed(1),sum(b)-sum(a))}${row('≈ € per ml',ca/(a.targetMl||1)>0?(ca/a.targetMl).toFixed(3):'0',cb/(b.targetMl||1)>0?(cb/b.targetMl).toFixed(3):'0',cb/b.targetMl-ca/a.targetMl)}${names.map(n=>row(esc(short(n)),g(a,n)+'%',g(b,n)+'%',g(b,n)-g(a,n))).join('')}</div><div class="g2" style="margin-top:10px"><button class="b2" onclick="loadSaved(+$('cmpA').value)">✏️ Laad A</button><button class="b2" onclick="loadSaved(+$('cmpB').value)">✏️ Laad B</button></div>`}
+
+/* ===== v4.0: radar, matcher, lab-modus, prestaties, wrapped ===== */
+let labOpen=false,wrOpen=false,wrI=0,wrTimer=0,wrRaf=0,wrData=null;
+const cnt=load('vape_cnt',{}),badgeSt=load('vape_badges',{});
+function bump(k){cnt[k]=(cnt[k]||0)+1;store('vape_cnt',cnt);checkBadges()}
+
+/* Confetti + geluid */
+let cfP=[],cfRaf=0;
+function confetti(n=140){
+ try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return}catch{}
+ const cv=$('cf');cv.width=innerWidth;cv.height=innerHeight;const cols=['#22d3ee','#c084fc','#fbbf24','#34d399','#fb7185','#f472b6'];
+ for(let i=0;i<n;i++)cfP.push({x:innerWidth/2+(Math.random()-.5)*innerWidth*.3,y:innerHeight*.45,vx:(Math.random()-.5)*14,vy:-Math.random()*16-4,r:Math.random()*7+5,c:cols[i%cols.length],a:Math.random()*6,va:(Math.random()-.5)*.4,l:1});
+ if(!cfRaf)cfRaf=requestAnimationFrame(cfStep)}
+function cfStep(){
+ const cv=$('cf'),x=cv.getContext('2d');x.clearRect(0,0,cv.width,cv.height);cfP=cfP.filter(p=>p.l>0&&p.y<cv.height+30);
+ cfP.forEach(p=>{p.vy+=.45;p.vx*=.992;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;p.l-=.007;x.save();x.globalAlpha=Math.max(0,Math.min(1,p.l*1.6));x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/3,p.r,p.r*.6);x.restore()});
+ cfRaf=cfP.length?requestAnimationFrame(cfStep):0;if(!cfP.length)x.clearRect(0,0,cv.width,cv.height)}
+function beep(){try{const a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=880;g.gain.setValueAtTime(.2,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.6);o.start();o.stop(a.currentTime+.6)}catch{}}
+
+/* Smaakcategorieën */
+const CATS=[['fruit','Fruit','🍓'],['romig','Romig','🍦'],['bakkerij','Bakkerij','🥐'],['zoet','Zoet','🍬'],['fris','Fris','🧊'],['tabak','Tabak','🍂'],['drank','Drank','☕']],CN=Object.fromEntries(CATS.map(([k,n])=>[k,n]));
+const KWS=Object.fromEntries(Object.entries({
+ fruit:'strawberry,blueberry,raspberry,blackberry,cranberry,watermelon,pineapple,berry,berries,fruit,apple,mango,peach,grape,cherry,lemon,melon,banana,orange,citrus,lime,pear,kiwi,passion,guava,papaya,lychee,plum,apricot,coconut,currant,tropical,juicy,aardbei,framboos,appel,peer,citroen,ananas,banaan,sinaasappel,bosbes,kers,perzik,druif',
+ romig:'custard,cream,bavarian,vanilla,butter,milk,yogurt,yoghurt,cheesecake,mascarpone,condensed,pudding,flan,tiramisu,gelato,dairy,whipped,eclair,romig,vanille,melk,bavarois',
+ bakkerij:'cake,cookie,donut,doughnut,waffle,pie,bread,biscuit,graham,pastry,cinnamon,brownie,muffin,croissant,pancake,crust,cracker,dough,bakery,cheesecake:.7,koek,taart,wafel,brood,gebak,speculaas,stroopwafel,crumble,biscotti,churro',
+ zoet:'caramel,honey,sugar,sweet:.4,candy,toffee,syrup,marshmallow,chocolate,fudge,sweetener,sucralose,bubblegum,gummy,jelly,lollipop,snoep,suiker,honing,chocolade,nougat,praline,cotton,butterscotch,maple,molasses,dulce,jam',
+ fris:'menthol,mint,peppermint,spearmint,koolada,ice,cool,cooling,frost,arctic,eucalyptus,fresh,freeze,polar,glacier,menthe,munt,ijs,winter,chill,breeze,frozen',
+ tabak:'tobacco,tabak,tobak,ry4,cigar,cuban,virginia,burley,havana,pipe,leaf,rustic,cavendish,latakia,oriental,kentucky',
+ drank:'coffee,espresso,cola,soda,tea,lemonade,energy,latte,cappuccino,beer,wine,whisk,rum,cocktail,juice,drink,mojito,koffie,thee,limonade,cider,vodka,gin,mocha,frappe,smoothie,milkshake,punch,mocktail,kombucha'}).map(([c,s])=>[c,s.split(',').map(t=>{const[k,w]=t.split(':');return[new RegExp(k.length<=4?`\\b${k}\\b`:`\\b${k}`),w?+w:1]})]));
+function catOf(name){
+ const L=findInv(name);if(L&&L.cat&&KWS[L.cat])return{[L.cat]:1};
+ const n=String(name||'').toLowerCase().replace(/ice[\s-]?cream/g,'gelato'),w={};let t=0;
+ for(const c in KWS){let m=0;for(const[re,wt]of KWS[c])if(re.test(n))m=Math.max(m,wt);if(m){w[c]=m;t+=m}}
+ if(!t)return null;for(const c in w)w[c]/=t;return w}
+function catProfile(list){const s={};let tot=0;list.forEach(f=>{const w=catOf(f.name),p=+f.pct||0;if(!w||p<=0)return;for(const c in w){s[c]=(s[c]||0)+p*w[c];tot+=p*w[c]}});if(!tot)return null;const r={};CATS.forEach(([k])=>r[k]=(s[k]||0)/tot);return r}
+const SOLO={fruit:'Fruitig',romig:'Romig',bakkerij:'Bakkerij-achtig',zoet:'Zoet',fris:'IJskoud fris',tabak:'Tabaksprofiel',drank:'Drankachtig'};
+const DUO={'fruit|romig':'Fruitig dessert','bakkerij|romig':'Bakkerij-dessert','fruit|zoet':'Zoet fruitsnoepje','fris|fruit':'IJskoude fruitmix','bakkerij|fruit':'Fruittaart','romig|zoet':'Karamelromig','bakkerij|zoet':'Zoet gebak','drank|romig':'Dessert-drank','drank|fris':'Frisse drank','drank|fruit':'Fruitige drank','romig|tabak':'Romige tabak','tabak|zoet':'Zoete tabak','fris|tabak':'Frisse tabak','bakkerij|tabak':'Gebakken tabak','bakkerij|drank':'Koffiehuis-gebak','drank|zoet':'Zoete drank','fris|romig':'Romige frisheid','bakkerij|fris':'Frisse bakkerij','fris|zoet':'Frisse zoetigheid','fruit|tabak':'Fruitige tabak'};
+const sortedCats=p=>CATS.map(([k])=>[k,p[k]]).sort((a,b)=>b[1]-a[1]);
+function typer(p){if(!p)return null;const s=sortedCats(p);if(s[1][1]<.25*s[0][1]||s[1][1]<.1)return SOLO[s[0][0]];return DUO[[s[0][0],s[1][0]].sort().join('|')]||`${CN[s[0][0]]}-${CN[s[1][0]].toLowerCase()} mix`}
+const curList=()=>blend.length?aromaProfile():flavors.filter(f=>f.name).map(f=>({name:f.name,pct:f.pct}));
+
+/* Smaakradar */
+function drawRadar(){
+ if(!$('radar'))return;const list=curList(),p=catProfile(list),n=7,R=92,cx=150,cy=128,pt=(i,r)=>[cx+Math.cos(-Math.PI/2+i*2*Math.PI/n)*r,cy+Math.sin(-Math.PI/2+i*2*Math.PI/n)*r];
+ const unk=list.filter(f=>!catOf(f.name)).map(f=>f.name);
+ $('radNote').textContent=unk.length?`Niet herkend: ${unk.join(', ')}. Stel een categorie in via Voorraad ✎.`:'';
+ if(!p){$('radTy').textContent='';$('radar').innerHTML='<p class="note" style="text-align:center">Voeg een herkenbaar aroma toe om het smaakprofiel te zien.</p>';return}
+ const mx=Math.max(...CATS.map(([k])=>p[k])),poly=r=>CATS.map((_,i)=>pt(i,r).map(v=>v.toFixed(1)).join(',')).join(' ');
+ $('radTy').textContent=typer(p);
+ const val=CATS.map(([k],i)=>pt(i,Math.max(5,R*p[k]/mx)).map(v=>v.toFixed(1)).join(',')).join(' ');
+ $('radar').innerHTML=`<svg viewBox="-40 0 380 262" style="width:100%;max-width:340px;display:block;margin:0 auto"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee" stop-opacity=".55"/><stop offset="1" stop-color="#c084fc" stop-opacity=".55"/></linearGradient></defs>${[.25,.5,.75,1].map(f=>`<polygon points="${poly(R*f)}" fill="none" style="stroke:var(--bd)" stroke-width="1"/>`).join('')}${CATS.map((_,i)=>`<line x1="${cx}" y1="${cy}" x2="${pt(i,R)[0].toFixed(1)}" y2="${pt(i,R)[1].toFixed(1)}" style="stroke:var(--bd)"/>`).join('')}<polygon points="${val}" fill="url(#rg)" style="stroke:var(--ac)" stroke-width="2"/>${CATS.map(([k,nm,em],i)=>{const[a,b]=pt(i,R+26),an=a<cx-8?'end':a>cx+8?'start':'middle';return`<text x="${a.toFixed(1)}" y="${(b+3).toFixed(1)}" text-anchor="${an}" font-size="11" font-weight="700" style="fill:var(--tx)">${em} ${nm}</text><text x="${a.toFixed(1)}" y="${(b+15).toFixed(1)}" text-anchor="${an}" font-size="10" style="fill:var(--mu)">${Math.round(p[k]*100)}%</text>`}).join('')}</svg>`}
+
+/* Smaakmatcher */
+const AFFT={'fruit|fruit':.65,'fruit|romig':.95,'bakkerij|fruit':.8,'fruit|zoet':.75,'fris|fruit':.8,'fruit|tabak':.3,'drank|fruit':.7,'romig|romig':.6,'bakkerij|romig':.95,'romig|zoet':.9,'fris|romig':.45,'romig|tabak':.75,'drank|romig':.8,'bakkerij|bakkerij':.6,'bakkerij|zoet':.85,'bakkerij|fris':.3,'bakkerij|tabak':.6,'bakkerij|drank':.75,'zoet|zoet':.4,'fris|zoet':.55,'tabak|zoet':.7,'drank|zoet':.65,'fris|fris':.5,'fris|tabak':.45,'drank|fris':.7,'tabak|tabak':.65,'drank|tabak':.65,'drank|drank':.55};
+const aff=(a,b)=>AFFT[[a,b].sort().join('|')]??.5;
+function renderMatcher(){
+ if(!$('matcher'))return;const list=curList(),p=catProfile(list),used=new Set(list.map(f=>f.name.toLowerCase()));
+ if(!p){$('matcher').innerHTML='<p class="note">Voeg eerst een herkenbaar aroma toe aan je recept (tab Calc), dan stel ik passende aroma\'s uit je voorraad voor.</p>';return}
+ const top=sortedCats(p)[0];
+ const res=inventory.filter(i=>i.ml>0&&!used.has(i.name.toLowerCase())).map(i=>{const w=catOf(i.name);if(!w)return null;let sc=0;for(const k in w)for(const j in p)sc+=w[k]*p[j]*aff(k,j);const dom=Object.entries(w).sort((a,b)=>b[1]-a[1])[0][0];if(dom===top[0]&&top[1]>.5)sc*=.85;return{i,dom,pct:Math.max(20,Math.min(99,Math.round(sc*100)))}}).filter(Boolean).sort((a,b)=>b.pct-a.pct).slice(0,6);
+ $('matcher').innerHTML=`<div class="sub" style="margin-bottom:8px">Huidig profiel: <b style="color:var(--am)">${typer(p)}</b></div>`+(res.map(r=>`<div class="it"><div style="flex:1;min-width:0"><b style="font-size:.86rem">${esc(r.i.name)}</b><div class="sub">${(CATS.find(c=>c[0]===r.dom)||[])[2]||''} ${CN[r.dom]} · ${r.i.ml} ml op voorraad${r.i.rec?` · aanb. ${r.i.rec}%`:''}</div><div class="mt"><i style="width:${r.pct}%"></i></div></div><div style="text-align:center"><b style="font-size:1.05rem;color:var(--ok)">${r.pct}%</b><div class="sub">match</div></div><button class="b2 sm" onclick="matchAdd(${inventory.indexOf(r.i)})">+ Toevoegen</button></div>`).join('')||'<p class="note">Geen andere herkenbare aroma\'s met voorraad om voor te stellen.</p>')}
+function matchAdd(i){const L=inventory[i];if(!L)return;flavors.push({name:L.name,pct:L.rec||3});renderFlavors();calculate();toast(`🤝 ${L.name} toegevoegd (${L.rec||3}%)`);bump('match');renderMatcher()}
+
+/* Lab-modus */
+const LB={i:0,steps:[],unit:'ml',shown:0,raf:0,deducted:false,t0:0,tm:0,wl:null,tx:0,tot:0};
+const rk=l=>l==='PG'?0:/^Premix/.test(l)?1:2;
+function mixList(){
+ const c=calc(),o=[];
+ blend.forEach(x=>{const L=liq(x.id);if(L&&x.ml>0){const v=L.vg/100;o.push({col:'var(--pk)',name:'🍶 '+L.name,ml:x.ml,d:D.VG*v+D.PG*(1-v)})}});
+ if(c.nicMl>0)o.push({col:'var(--pu)',name:`Nicotine ${nicType==='salts'?'Salt':'Freebase'} ${c.bm} mg`,ml:c.nicMl,d:D.NIC});
+ flavors.forEach(f=>{const m=c.ml*(+f.pct||0)/100;if(m>0)o.push({col:'var(--am)',name:f.name||'Aroma',ml:m,d:D.FL})});
+ const b=[];if(c.mixMl>0)b.push({col:'var(--tl)',name:`Premix ${c.mixVgPct}VG/${100-c.mixVgPct}PG`,ml:c.mixMl,d:D.VG*c.mixVgPct/100+D.PG*(1-c.mixVgPct/100)});
+ b.push({col:'var(--ac)',name:'PG',ml:c.pgMl,d:D.PG},{col:'var(--ok)',name:'VG',ml:c.vgMl,d:D.VG});b.sort((p,q)=>rk(p.name)-rk(q.name));
+ return o.concat(b).filter(s=>s.ml>.004)}
+async function labWake(){try{LB.wl=await navigator.wakeLock?.request('screen')}catch{}}
+addEventListener('visibilitychange',()=>{if(labOpen&&document.visibilityState==='visible')labWake()});
+function labStart(){
+ const st=mixList();if(!st.length)return toast('⚠️ Er is niets te mixen: vul eerst een recept in');
+ let cm=0,cg=0;st.forEach(s=>{s.g=s.ml*s.d;cm+=s.ml;cg+=s.g;s.cumMl=cm;s.cumG=cg});
+ Object.assign(LB,{steps:st,i:0,unit:mode==='g'?'g':'ml',shown:0,deducted:false,tot:cm,totG:cg});
+ labOpen=true;$('labOv').classList.add('on');document.body.style.overflow='hidden';labWake();
+ try{$('labOv').requestFullscreen?.({navigationUI:'hide'})?.catch(()=>{})}catch{}
+ labRender()}
+function labClose(){labOpen=false;$('labOv').classList.remove('on');document.body.style.overflow='';clearInterval(LB.tm);LB.tm=0;cancelAnimationFrame(LB.raf);try{LB.wl?.release()}catch{}LB.wl=null;try{if(document.fullscreenElement)document.exitFullscreen()}catch{}}
+const labUnit=u=>{LB.unit=u;labRender()};
+function labGo(d){const n=LB.steps.length,ni=Math.max(0,Math.min(n,LB.i+d));if(ni===LB.i)return;LB.i=ni;try{navigator.vibrate?.(15)}catch{}labRender();if(ni===n){confetti(200);navigator.vibrate?.([60,40,60])}}
+function labBottle(fr){
+ const s=LB.steps,tot=LB.tot||1,Y=m=>138-m/tot*96;let h='';
+ s.forEach((x,k)=>{const a=k?s[k-1].cumMl:0,b=x.cumMl,top=Math.min(b,fr*tot);
+  if(top>a)h+=`<rect x="20" y="${Y(top).toFixed(1)}" width="80" height="${((top-a)/tot*96+.4).toFixed(1)}" style="fill:${x.col}"/>`;
+  if(k===LB.i&&b>top)h+=`<rect x="20" y="${Y(b).toFixed(1)}" width="80" height="${((b-Math.max(a,top))/tot*96).toFixed(1)}" style="fill:${x.col}" class="pv"/>`});
+ const el=$('labBot');if(!el)return;
+ el.innerHTML=`<svg viewBox="0 0 120 150" style="height:clamp(130px,26vh,230px);filter:drop-shadow(0 10px 22px rgba(0,0,0,.4))"><defs><clipPath id="lbc"><rect x="20" y="42" width="80" height="96" rx="14"/></clipPath></defs><rect x="46" y="14" width="28" height="30" rx="4" fill="none" stroke-width="2" style="stroke:var(--mu)"/><rect x="42" y="4" width="36" height="12" rx="4" style="fill:var(--ac)"/><g clip-path="url(#lbc)"><rect x="20" y="42" width="80" height="96" fill="rgba(148,163,184,.12)"/>${h}<rect x="26" y="42" width="8" height="96" fill="#fff" opacity=".16"/></g><rect x="20" y="42" width="80" height="96" rx="14" fill="none" stroke-width="2" style="stroke:var(--mu)"/></svg>`}
+function labAnim(to){cancelAnimationFrame(LB.raf);const from=LB.shown,t0=performance.now(),dur=to>from?650:200;const f=now=>{const k=Math.min(1,(now-t0)/dur);LB.shown=from+(to-from)*(1-Math.pow(1-k,3));labBottle(LB.shown);if(k<1)LB.raf=requestAnimationFrame(f)};LB.raf=requestAnimationFrame(f)}
+function labRender(){
+ const s=LB.steps,n=s.length,i=LB.i,done=i>=n,g=LB.unit==='g',c=calc();
+ const hd=`<div class="lhd"><button class="x" onclick="labClose()" aria-label="Sluiten">✕</button><b>${done?'🎉 Klaar':`Stap ${i+1} / ${n}`}</b><div class="tg lu"><button class="${g?'':'fb'}" onclick="labUnit('ml')">ml</button><button class="${g?'salt':''}" onclick="labUnit('g')">gram</button></div></div><div class="lseg">${s.map((x,k)=>`<i class="${k<i?'d':k===i?'c':''}" style="--c:${x.col}"></i>`).join('')}</div><div id="labBot"></div>`;
+ let body;
+ if(!done){const x=s[i],v=g?x.g:x.ml;
+  body=`<div class="lname" style="color:${x.col}">${esc(x.name)}</div><div class="lbig">${v.toFixed(2)}<small>${g?'g':'ml'}</small></div><div class="lsub">${g?`<span class="pill">⚖️ Weegschaal toont: <b>${x.cumG.toFixed(2)} g</b></span><span class="sub">niet tarreren · +${x.g.toFixed(2)} g · ≈ ${x.ml.toFixed(2)} ml</span>`:`<span class="sub">= ${x.g.toFixed(2)} g · tot nu toe ${x.cumMl.toFixed(2)} ml</span>`}</div><div class="lnav"><button class="b2" onclick="labGo(-1)" ${i?'':'disabled'}>◀ Vorige</button><button class="b1" onclick="labGo(1)">${i===n-1?'Klaar ✓':'Volgende ▶'}</button></div><div class="note" style="text-align:center;margin:0">Swipe, gebruik de knoppen of ← → toetsen · scherm blijft aan</div>`}
+ else body=`<div class="lname">Alles gemengd!</div><div class="sub" style="text-align:center">${c.ml} ml · ${c.vg}VG / ${c.pg}PG · ${c.nic} mg/ml</div><div style="text-align:center"><div class="ring2" id="lring"><span id="ltime">60</span></div><button class="b1" id="lshake" onclick="labShake()">🥤 Start schudden (60 s)</button></div><div class="lnav" style="grid-template-columns:1fr;margin-top:auto"><button class="b2" id="ldeduct" onclick="labDeduct()">📉 Trek voorraad af &amp; sla batch op</button><button class="b2" onclick="labGo(-1)">◀ Terug naar laatste stap</button><button class="b2" onclick="labClose()">Sluiten</button></div>`;
+ $('labBody').innerHTML=hd+body;labAnim(done?1:(i?s[i-1].cumMl/LB.tot:0))}
+function labShake(){
+ if(LB.tm)return;LB.t0=Date.now();$('lshake').disabled=true;
+ LB.tm=setInterval(()=>{const t=$('ltime');if(!t){clearInterval(LB.tm);LB.tm=0;return}const left=Math.max(0,60-(Date.now()-LB.t0)/1000);t.textContent=Math.ceil(left);$('lring').style.background=`conic-gradient(var(--ok) ${(1-left/60)*100}%,var(--bd) 0)`;
+  if(left<=0){clearInterval(LB.tm);LB.tm=0;const b=$('lshake');b.textContent='✅ Klaar: laat steepen'+(recSteep?` (±${recSteep} d)`:'');b.disabled=false;beep();try{navigator.vibrate?.([200,100,200])}catch{}confetti(120)}},200)}
+function labDeduct(){if(LB.deducted)return;LB.deducted=true;deductInventory();bump('lab');const b=$('ldeduct');if(b){b.textContent='✅ Voorraad afgetrokken';b.disabled=true}confetti(160)}
+$('labOv').addEventListener('touchstart',e=>{LB.tx=e.touches[0].clientX},{passive:true});
+$('labOv').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-LB.tx;if(Math.abs(dx)>60)labGo(dx<0?1:-1)},{passive:true});
+document.addEventListener('keydown',e=>{
+ if(labOpen){if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();labGo(1)}else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();labGo(-1)}else if(e.key==='Escape')labClose()}
+ else if(wrOpen){if(e.key==='ArrowRight')wrGo(wrI+1);else if(e.key==='ArrowLeft')wrGo(wrI-1);else if(e.key==='Escape')wrClose()}});
+
+/* Prestaties */
+const saveAmt=()=>log.reduce((a,l)=>a+l.ml,0)/10*price.shop-log.reduce((a,l)=>a+l.cost,0),hrs=l=>new Date(l.t).getHours();
+const BADGES=[
+ ['drop','💧','Eerste druppel','Meng je eerste batch',()=>[log.length,1]],
+ ['dozen','📦','Dozijn','Meng 12 batches',()=>[log.length,12]],
+ ['liter','🧪','Literlab','Meng samen 1 liter',()=>[log.reduce((a,l)=>a+l.ml,0),1000]],
+ ['night','🌙','Nachtmixer','Meng een batch tussen 00:00 en 05:00',()=>[log.some(l=>hrs(l)<5)?1:0,1]],
+ ['early','🌅','Vroege vogel','Meng een batch tussen 05:00 en 08:00',()=>[log.some(l=>hrs(l)>=5&&hrs(l)<8)?1:0,1]],
+ ['piggy','🐷','Spaarpot','Bespaar €50 ten opzichte van winkelliquid',()=>[Math.max(0,saveAmt()),50]],
+ ['lib','📚','Bibliothecaris','Sla 10 recepten op',()=>[saved.length,10]],
+ ['collector','🌿','Aromaverzamelaar',"Heb 15 aroma's in je voorraad",()=>[inventory.length,15]],
+ ['patient','⏳','Geduldig','Laat een batch minstens 14 dagen steepen',()=>[steep.some(b=>b.days>=14&&(Date.now()-(b.start||b.id))/864e5>=b.days)?1:0,1]],
+ ['five','⭐','Vijfsterren','Geef een batch 5 sterren',()=>[steep.some(b=>b.rating===5)?1:0,1]],
+ ['scale','⚖️','Weegschaalheld','Meng 5 batches op gewicht',()=>[log.filter(l=>l.g).length,5]],
+ ['remix','🍶','Remixer','Gebruik eigen liquid in 3 batches',()=>[log.filter(l=>(l.r.blend||[]).length).length,3]],
+ ['dice','🎲','Gokker','Gebruik Verras me 10 keer',()=>[cnt.dice||0,10]],
+ ['lab','🧑‍🔬','Lab-assistent','Rond een batch af in lab-modus',()=>[cnt.lab||0,1]],
+ ['art','🏷️','Etiketkunstenaar','Download 5 etiketten',()=>[cnt.labels||0,5]],
+ ['match','🤝','Smaakmaker',"Voeg 5 aroma's toe via de Smaakmatcher",()=>[cnt.match||0,5]]];
+function checkBadges(silent){
+ const nw=[];BADGES.forEach(([id,ic,n,d,f])=>{if(badgeSt[id])return;const[v,m]=f();if(v>=m){badgeSt[id]=Date.now();nw.push([ic,n])}});
+ if(!nw.length)return;store('vape_badges',badgeSt);
+ if(!silent)setTimeout(()=>{toast('🏆 Nieuwe prestatie: '+nw.map(b=>b[0]+' '+b[1]).join(', '));confetti(160);try{navigator.vibrate?.(120)}catch{}},700);
+ if($('tab-dash').classList.contains('on'))renderBadges()}
+function renderBadges(){
+ const got=BADGES.filter(b=>badgeSt[b[0]]).length;$('badgeCount').textContent=`${got}/${BADGES.length}`;
+ $('badges').innerHTML=BADGES.map(([id,ic,n,d,f])=>{const[v,m]=f(),ok=!!badgeSt[id];return`<div class="bd${ok?' ok':''}"><div class="bi">${ok?ic:'🔒'}</div><b>${n}</b><span>${d}</span>${ok?`<em>${new Date(badgeSt[id]).toLocaleDateString('nl-BE')}</em>`:`<div class="bp"><i style="width:${Math.min(1,v/m)*100}%"></i></div><em>${Math.floor(Math.min(v,m))}/${m}</em>`}</div>`}).join('')}
+
+/* Lab Wrapped */
+const NLM=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'],PERSONA={fruit:'De Fruitfanaat',romig:'De Roommeester',bakkerij:'De Bakkerij-alchemist',zoet:'De Suikerstorm',fris:'De IJsbreker',tabak:'De Tabaksprofessor',drank:'De Barista-brouwer'};
+function wrapData(){
+ const yr=new Date().getFullYear(),ys=log.filter(l=>new Date(l.t).getFullYear()===yr),L=ys.length?ys:log,ar={},months=Array(12).fill(0),fl=[];
+ const ml=L.reduce((a,l)=>a+l.ml,0),cost=L.reduce((a,l)=>a+l.cost,0);
+ L.forEach(l=>{months[new Date(l.t).getMonth()]+=l.ml;const add=(nm,m)=>{if(!nm||!(m>0))return;(ar[nm]??={ml:0,n:0}).ml+=m;ar[nm].n++;fl.push({name:nm,pct:m})};
+  (l.r.flavors||[]).forEach(f=>add(f.name,l.ml*(+f.pct||0)/100));(l.r.blend||[]).forEach(b=>{const q=liq(b.id);if(q)q.flavors.forEach(f=>add(f.name,b.ml*(+f.pct||0)/100))})});
+ const top=Object.entries(ar).sort((a,b)=>b[1].ml-a[1].ml).slice(0,3).map(([name,v])=>({name,ml:v.ml,n:v.n})),prof=catProfile(fl),mx=Math.max(...months),first=L.length?Math.min(...L.map(l=>l.t)):Date.now();
+ return{per:ys.length||!log.length?String(yr):'Totaal',n:L.length,ml,cost,top,prof,ty:typer(prof),persona:prof?PERSONA[sortedCats(prof)[0][0]]:'De Beginner',months,mi:mx>0?months.indexOf(mx):-1,
+  rated:steep.filter(b=>b.rating>0).sort((a,b)=>b.rating-a.rating||b.id-a.id)[0]||null,saved:ml/10*price.shop-cost,shop:ml/10*price.shop,every:L.length?Math.max(1,(Date.now()-first)/864e5)/L.length:0,badges:BADGES.filter(b=>badgeSt[b[0]]).length}}
+function wrRadar(x,cx,cy,R,p,e){
+ const n=7,pt=(i,r)=>[cx+Math.cos(-Math.PI/2+i*2*Math.PI/n)*r,cy+Math.sin(-Math.PI/2+i*2*Math.PI/n)*r],F='system-ui,-apple-system,"Segoe UI",sans-serif';
+ x.strokeStyle='rgba(255,255,255,.3)';x.lineWidth=3;[.25,.5,.75,1].forEach(f=>{x.beginPath();for(let i=0;i<=n;i++){const[a,b]=pt(i%n,R*f);i?x.lineTo(a,b):x.moveTo(a,b)}x.stroke()});
+ for(let i=0;i<n;i++){const[a,b]=pt(i,R);x.beginPath();x.moveTo(cx,cy);x.lineTo(a,b);x.stroke()}
+ const mx=Math.max(...CATS.map(([k])=>p[k]),.001);x.beginPath();CATS.forEach(([k],i)=>{const[a,b]=pt(i,R*Math.max(.06,p[k]/mx)*e);i?x.lineTo(a,b):x.moveTo(a,b)});x.closePath();x.fillStyle='rgba(253,230,138,.45)';x.fill();x.strokeStyle='#fde68a';x.lineWidth=6;x.stroke();
+ x.fillStyle='#fff';x.textAlign='center';CATS.forEach(([k,nm,em],i)=>{const[a,b]=pt(i,R+78);x.font=`700 48px ${F}`;x.fillText(em,a,b);x.font=`600 30px ${F}`;x.fillText(nm,a,b+40)})}
+function wrDraw(cv,i,t){
+ const W=1080,H=1920,x=cv.getContext('2d'),d=wrData,e=1-Math.pow(1-t,3),cx=W/2,F='system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',nl=v=>String(v).replace('.',','),eur=v=>'€'+nl(Math.max(0,v).toFixed(2));
+ const BG=[['#0e7490','#7c3aed'],['#4c1d95','#be185d'],['#064e3b','#0e7490'],['#7c2d12','#be123c'],['#312e81','#0e7490'],['#14532d','#a16207'],['#1e1b4b','#c026d3'],['#831843','#d97706'],['#0f172a','#4c1d95']][i];
+ const g=x.createLinearGradient(0,0,W*.6,H);g.addColorStop(0,BG[0]);g.addColorStop(1,BG[1]);x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.globalAlpha=.1;x.fillStyle='#fff';[[900,300,380],[120,1500,460],[960,1700,220]].forEach(([a,b,r])=>{x.beginPath();x.arc(a,b,r,0,7);x.fill()});x.globalAlpha=1;
+ const T=(s,px,py,sz,w='800',col='#fff',al='center',mw=940)=>{let z=sz;x.font=`${w} ${z}px ${F}`;s=String(s);while(z>24&&x.measureText(s).width>mw){z-=2;x.font=`${w} ${z}px ${F}`}x.fillStyle=col;x.textAlign=al;x.textBaseline='alphabetic';x.fillText(s,px,py)};
+ const wrapT=(s,px,py,sz,lh,mw,mx)=>{x.font=`600 ${sz}px ${F}`;const ws=String(s).split(/\s+/);let ln='',l=0;for(const w of ws){const tt=ln?ln+' '+w:w;if(x.measureText(tt).width>mw&&ln){T(ln,px,py+l*lh,sz,'600','rgba(255,255,255,.9)','center',mw);l++;ln=w;if(l>=mx)break}else ln=tt}if(l<mx)T(ln,px,py+l*lh,sz,'600','rgba(255,255,255,.9)','center',mw)};
+ const bar=(y,lab,v,mx,col)=>{T(lab,90,y,40,'700','rgba(255,255,255,.85)','left',560);T(eur(v),990,y,44,'800','#fff','right',380);x.fillStyle='rgba(255,255,255,.2)';x.beginPath();x.roundRect(90,y+22,900,56,28);x.fill();x.fillStyle=col;x.beginPath();x.roundRect(90,y+22,Math.max(28,900*(mx?v/mx:0)*e),56,28);x.fill()};
+ T('LAB WRAPPED · '+String(d.per).toUpperCase(),cx,140,38,'700','rgba(255,255,255,.7)');
+ if(i===0){T('🧪',cx,660,280);T('Jouw jaar',cx,940,130);T('in de lab',cx,1080,130,'900');T(d.per,cx,1360,240,'900','#fde68a');T('Tik om door te gaan',cx,1780,36,'600','rgba(255,255,255,.6)')}
+ else if(i===1){T('Je mixte',cx,640,84,'600');T(Math.round(d.n*e),cx,1030,380,'900','#fde68a');T(d.n===1?'batch':'batches',cx,1160,120);T(d.n?`Gemiddeld één batch per ${Math.max(1,Math.round(d.every))} dagen`:'Tijd om je eerste batch te mixen!',cx,1420,52,'600','rgba(255,255,255,.85)')}
+ else if(i===2){const l=d.ml*e/1000;T('Samen goed voor',cx,640,84,'600');T(nl(l.toFixed(l<10?2:1)),cx,1030,340,'900','#fde68a');T('liter e-liquid',cx,1160,110);T(`= ${Math.round(d.ml/60)} flesjes van 60 ml`,cx,1400,56,'700','rgba(255,255,255,.9)');T(d.ml?`Kostprijs ± €${nl((d.cost/d.ml*1000).toFixed(2))} per liter`:'',cx,1490,44,'600','rgba(255,255,255,.7)')}
+ else if(i===3){T('Je trouwste aroma',cx,520,80,'600');const a=d.top[0];if(a){T(short(a.name),cx,800,130,'900','#fde68a');T(`${a.ml.toFixed(0)} ml in ${a.n} ${a.n===1?'batch':'batches'}`,cx,910,54,'600','rgba(255,255,255,.9)');d.top.forEach((o,k)=>{const y=1180+k*190;T(`${k+1}. ${short(o.name)}`,90,y,46,'700','#fff','left',640);T(`${o.ml.toFixed(0)} ml`,990,y,46,'700','#fff','right',240);x.fillStyle='rgba(255,255,255,.2)';x.beginPath();x.roundRect(90,y+28,900,44,22);x.fill();x.fillStyle=k?'rgba(255,255,255,.75)':'#fde68a';x.beginPath();x.roundRect(90,y+28,Math.max(22,900*o.ml/a.ml*e),44,22);x.fill()})}else T('Nog geen aroma\'s gemixt',cx,900,70,'700')}
+ else if(i===4){T('Jouw smaakpersoonlijkheid',cx,430,66,'600');T(d.persona,cx,620,130,'900','#fde68a');T(d.ty||'Mix een batch met herkenbare aroma\'s',cx,720,64,'700');if(d.prof)wrRadar(x,cx,1230,330,d.prof,e)}
+ else if(i===5){T(d.saved>0?'Je bespaarde':'Je uitgaven',cx,640,84,'600');T(eur(d.saved>0?d.saved*e:d.cost*e).replace('.',','),cx,1000,260,'900','#fde68a');T(d.saved>0?`t.o.v. winkelliquid (€${price.shop.toFixed(2)} per 10 ml)`:'Mix meer om te besparen',cx,1120,48,'600','rgba(255,255,255,.85)');const mx=Math.max(d.cost,d.shop,1);bar(1380,'Zelf gemaakt',d.cost,mx,'#34d399');bar(1560,'In de winkel',d.shop,mx,'#fb7185')}
+ else if(i===6){T('Je drukste maand',cx,520,80,'600');if(d.mi<0)T('Nog geen data',cx,900,100,'800');else{const nm=NLM[d.mi];T(nm[0].toUpperCase()+nm.slice(1),cx,820,170,'900','#fde68a');T(`${d.months[d.mi].toFixed(0)} ml gemixt`,cx,930,60,'600','rgba(255,255,255,.9)');const mx=Math.max(...d.months),bw=56,gp=17,sx=(W-(12*bw+11*gp))/2;d.months.forEach((v,k)=>{const h=Math.max(8,480*(v/mx)*e);x.fillStyle=k===d.mi?'#fde68a':'rgba(255,255,255,.55)';x.beginPath();x.roundRect(sx+k*(bw+gp),1560-h,bw,h,14);x.fill();T('JFMAMJJASOND'[k],sx+k*(bw+gp)+bw/2,1620,36,'700','rgba(255,255,255,.8)')})}}
+ else if(i===7){T('Best beoordeelde batch',cx,520,76,'600');const r=d.rated;if(r){T(r.name,cx,830,120,'900','#fde68a');T('★'.repeat(r.rating)+'☆'.repeat(5-r.rating),cx,1030,130,'800','#fff');if(r.notes)wrapT('“'+String(r.notes).slice(0,110)+'”',cx,1250,56,76,860,3)}else{T('Nog geen beoordeling',cx,880,90,'800');T('Geef een batch sterren in de Steep-tab',cx,990,48,'600','rgba(255,255,255,.8)')}}
+ else{T('Mijn Lab Wrapped',cx,300,100,'900');const rows=[['Batches',d.n],['Volume',nl((d.ml/1000).toFixed(2))+' liter'],['Trouwste aroma',d.top[0]?short(d.top[0].name):'–'],['Smaakprofiel',d.ty||'–'],['Persoonlijkheid',d.persona],['Bespaard',eur(d.saved)],['Drukste maand',d.mi>=0?NLM[d.mi][0].toUpperCase()+NLM[d.mi].slice(1):'–'],[d.rated?`Beste batch (${d.rated.rating}★)`:'Beste batch',d.rated?d.rated.name:'–'],['Prestaties',`${d.badges}/${BADGES.length}`]];
+  rows.forEach(([a,b],k)=>{const y=480+k*160;x.fillStyle='rgba(255,255,255,.12)';x.beginPath();x.roundRect(60,y-70,960,130,28);x.fill();T(a,100,y+8,38,'600','rgba(255,255,255,.7)','left',360);T(b,980,y+12,54,'800','#fff','right',520)});T('E-Liquid Lab',cx,1860,40,'700','rgba(255,255,255,.55)')}}
+function wrSegs(){$('wSeg').innerHTML=Array.from({length:9},(_,k)=>`<i class="${k<wrI?'d':k===wrI?(k<8?'c':'d'):''}"><b></b></i>`).join('')}
+function wrGo(i){
+ if(i>8)return;i=Math.max(0,i);wrI=i;wrSegs();clearTimeout(wrTimer);cancelAnimationFrame(wrRaf);const cv=$('wrC'),t0=performance.now();
+ const f=now=>{const t=Math.min(1,(now-t0)/1100);wrDraw(cv,i,t);if(t<1)wrRaf=requestAnimationFrame(f)};wrRaf=requestAnimationFrame(f);
+ if(i<8)wrTimer=setTimeout(()=>wrGo(i+1),6000)}
+function wrOpenUI(){wrData=wrapData();wrOpen=true;$('wrOv').classList.add('on');document.body.style.overflow='hidden';wrGo(0)}
+function wrClose(){wrOpen=false;clearTimeout(wrTimer);cancelAnimationFrame(wrRaf);$('wrOv').classList.remove('on');document.body.style.overflow=''}
+$('wSt').addEventListener('click',e=>{const r=e.currentTarget.getBoundingClientRect();wrGo(e.clientX-r.left<r.width*.35?wrI-1:wrI+1)});
+function wrShare(all){const c=document.createElement('canvas');c.width=1080;c.height=1920;wrDraw(c,all?8:wrI,1);exportCanvas(c,`lab-wrapped-${wrData.per}${all?'':'-slide'+(wrI+1)}.png`)}
+
+/* ===== DTL → MTL ===== */
+const MT={vg:50,nic:0,boost:25,extra:[]};
+function mtlPlan(){
+ const c=calc(),salts=nicType==='salts',old=c.nic,nic=MT.nic>0?MT.nic:Math.round(Math.min(salts?20:18,Math.max(salts?10:6,old*(salts?4:3)))*2)/2;
+ const all=flavors.filter(f=>f.name).map(f=>({name:f.name,old:+f.pct||0,pct:Math.round((+f.pct||0)*(1+MT.boost/100)*10)/10})).concat(MT.extra.map(e=>({name:e.name,old:0,pct:e.pct,extra:1})));
+ const tot=all.reduce((a,f)=>a+f.pct,0),ml=c.ml,bm=c.bm,bv=num('nicBaseVg'),nicMl=ml*nic/bm,nVg=nicMl*bv/100,nPg=nicMl-nVg,flMl=ml*tot/100,flVg=all.reduce((a,f)=>a+(findInv(f.name)?.base==='VG'?f.pct:0),0)*ml/100;
+ return{c,old,nic,all,tot,oldTot:c.flPct,ml,bm,shot:nicMl/ml*100,vN:ml*MT.vg/100-nVg-flVg,pN:ml*(100-MT.vg)/100-nPg-(flMl-flVg),nicMl,salts}}
+function mtlSugg(){
+ const list=all=>all.filter(f=>f.name).map(f=>({name:f.name,pct:f.pct})),p=mtlPlan(),prof=catProfile(list(p.all));if(!prof)return[];
+ const used=new Set(p.all.map(f=>f.name.toLowerCase()));
+ return inventory.map((i,ix)=>({i,ix})).filter(({i})=>i.ml>0&&!used.has(i.name.toLowerCase())).map(({i,ix})=>{const w=catOf(i.name);if(!w)return null;let sc=0;for(const k in w)for(const j in prof)sc+=w[k]*prof[j]*aff(k,j);return{i,ix,sc,dom:Object.keys(w).sort((a,b)=>w[b]-w[a])[0]}}).filter(Boolean).sort((a,b)=>b.sc-a.sc).slice(0,3)}
+function renderMtl(){
+ const el=$('mtl');if(!el)return;
+ if(blend.length){el.innerHTML='<p class="note">Deze tool werkt met recepten van losse aroma\'s. Verwijder eerst gemengde liquids uit het recept.</p>';return}
+ if(!flavors.some(f=>f.name)){el.innerHTML='<p class="note">Vul eerst je DTL-recept in (aroma\'s met percentages). Hier verschijnt dan de MTL-versie.</p>';return}
+ const p=mtlPlan(),w=[],t=[],st=p.tot<8?['laag','var(--am)']:p.tot>18?['hoog','#fb7185']:['goed','var(--ok)'];
+ if(p.vN<-.01||p.pN<-.01)w.push('⛔ Past niet: aroma en nicotine nemen meer PG/VG in dan beschikbaar. Verlaag de nicotine of het aroma-percentage, of verhoog PG.');
+ if(p.nic>20)w.push('⚠️ Boven 20 mg/ml: dit is de EU-limiet voor verkochte liquids en wordt snel scherp.');
+ if(p.shot>40)w.push(`⚠️ De nicotineshot neemt ${p.shot.toFixed(0)}% van het volume in. De rest wordt zo dun dat aroma's relatief verdund aanvoelen. Gebruik een sterkere shot (nu ${p.bm} mg/ml) of kies een lagere sterkte.`);
+ if(p.tot<8)t.push(`Je totale aroma (${p.tot.toFixed(1)}%) is laag voor MTL. Op een kleine coil bij lage wattage komt weinig smaak door. Streef naar 8 tot 18%.`);
+ if(p.tot>18)t.push('Boven 18% aroma kan het bitter of chemisch worden en de coil sneller vervuilen.');
+ if(p.nic>=12&&!p.salts)t.push('Bij 12 mg of meer is nicotinezout vaak zachter in de keel dan freebase.');
+ const sug=p.tot<10?mtlSugg():[];
+ el.innerHTML=`<div class="sub" style="margin-bottom:10px">Uitgangspunt: <b>${p.old} mg</b>, <b>${p.c.vg}VG/${p.c.pg}PG</b>, <b>${p.oldTot.toFixed(1)}%</b> aroma (${p.ml} ml). MTL werkt het best met meer PG en meer nicotine.</div>
+ <div class="g2" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px">${[[50,50],[40,60],[30,70]].map(([v,g])=>`<button class="${MT.vg===v?'b1':'b2'} sm" onclick="MT.vg=${v};renderMtl()">${v}VG/${g}PG</button>`).join('')}</div>
+ <div class="g2" style="margin-bottom:10px"><div class="fg"><label>Nicotine (mg/ml)</label><input type="number" step="0.5" min="0" value="${p.nic}" onchange="MT.nic=+this.value||0;renderMtl()"></div><div class="fg"><label>Aroma-boost</label><select onchange="MT.boost=+this.value;renderMtl()">${[0,15,25,40].map(v=>`<option value="${v}"${MT.boost===v?' selected':''}>+${v}%</option>`).join('')}</select></div></div>
+ <div class="it" style="display:block"><b>MTL-versie: ${p.nic} mg · ${MT.vg}VG/${100-MT.vg}PG</b><div class="sub" style="margin:4px 0 8px">Totaal aroma <b style="color:${st[1]}">${p.tot.toFixed(1)}% (${st[0]})</b></div>${p.all.map(f=>`<div class="sub" style="display:flex;justify-content:space-between;gap:8px"><span>${f.extra?'➕ ':''}${esc(f.name)}</span><b>${f.extra?'':f.old+'% → '}${f.pct}%</b></div>`).join('')}</div>
+ ${w.map(x=>`<p class="note" style="color:#fb7185">${x}</p>`).join('')}${t.map(x=>`<p class="note">💡 ${x}</p>`).join('')}
+ ${sug.length?`<div class="sub" style="margin:10px 0 6px">Aroma's uit je voorraad die kunnen helpen:</div>`+sug.map(s=>`<div class="it"><div style="flex:1;min-width:0"><b style="font-size:.86rem">${esc(s.i.name)}</b><div class="sub">${CN[s.dom]} · ${s.i.ml} ml op voorraad</div></div><button class="b2 sm" onclick="mtlAdd(${s.ix})">+ ${Math.min(3,s.i.rec||2)}%</button></div>`).join(''):''}
+ ${MT.extra.length?`<button class="b2 sm" style="margin-top:8px" onclick="MT.extra=[];renderMtl()">Extra aroma's wissen</button>`:''}
+ <button class="b1" style="margin-top:12px;width:100%" onclick="mtlLoad()">Laad MTL-versie in calculator</button>
+ <p class="note">Dit vervangt je huidige recept. Sla je DTL-versie eerst op als je die wilt bewaren. Streef na mixen naar minstens 1 tot 2 weken steepen.</p>`}
+function mtlAdd(ix){const L=inventory[ix];if(!L)return;MT.extra.push({name:L.name,pct:Math.min(3,L.rec||2)});renderMtl()}
+function mtlLoad(){const p=mtlPlan();applyR({name:($('recipeName').value||'Recept').replace(/\s*\(MTL\)$/,'')+' (MTL)',targetMl:p.ml,targetNic:p.nic,targetVg:MT.vg,nicType,flavors:p.all.map(f=>({name:f.name,pct:f.pct})),blend:[]});MT.extra=[];MT.nic=0;toast('🎯 MTL-versie geladen')}
+function exportBackup(){markBackup();outFile(`vape_lab_backup_${new Date().toISOString().slice(0,10)}.json`,new Blob([JSON.stringify({inventory,steepBatches:steep,savedRecipes:saved,mixLog:log,prices:price,bases,liquids,bottles,badges:badgeSt,counters:cnt,version:'4.0',exportDate:new Date().toISOString()},null,2)],{type:'application/json'}))}
+function importBackup(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.inventory))inventory=d.inventory;if(Array.isArray(d.steepBatches))steep=d.steepBatches;if(Array.isArray(d.savedRecipes))saved=d.savedRecipes;if(d.badges&&typeof d.badges==='object'){Object.assign(badgeSt,d.badges);store('vape_badges',badgeSt)}if(d.counters&&typeof d.counters==='object'){Object.assign(cnt,d.counters);store('vape_cnt',cnt)}if(Array.isArray(d.bottles)){bottles=d.bottles;store('vape_bottles',bottles);renderBottle()}if(Array.isArray(d.liquids)){liquids=d.liquids;store('vape_liquids',liquids);renderLiquids();renderBlend()}if(Array.isArray(d.bases)){bases=d.bases;store('vape_bases',bases);renderBases()}if(d.prices){Object.assign(price,d.prices);store('vape_prices',price);initCfg()}if(Array.isArray(d.mixLog)){log=d.mixLog;store('vape_log',log);renderLog()}store('vape_saved_recipes',saved);renderInventory();renderSteep();renderSaved();renderFlavors();toast('✅ Backup geïmporteerd')}catch{toast('❌ Ongeldig JSON-bestand')}};r.readAsText(f)}
+
+renderFlavors();renderInventory();renderSteep();renderSaved();renderSuggestions();try{navigator.storage?.persist?.()}catch{}renderLiquids();renderBlend();renderBottle();renderBases();calcCorrection();initCfg();renderLog();checkBadges(true);drawRadar();renderMtl();
+</script>
+<script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
+</body>
+</html>
