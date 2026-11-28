@@ -193,6 +193,7 @@
  <div class="ch"><span class="ct">📂 Backup</span></div><p class="note">Exporteer recepten, voorraad en steep-batches als .json. Op je telefoon opent dit het deelmenu, zodat je het naar Drive, iCloud of Bestanden kunt sturen.</p>
  <button class="b1" style="margin-bottom:14px" onclick="exportBackup()">💾 Exporteer backup</button>
  <div id="stSt" class="note" style="margin-bottom:10px">…</div><button class="b2" style="margin-bottom:14px" onclick="persistAsk(true)">🔒 Beveilig opslag</button>
+ <button class="b2" style="margin-bottom:14px" onclick="updCheck(true)">🔄 Zoek naar app-update</button>
  
  <div class="g2" style="margin-bottom:14px"><button class="b2" onclick="csvOut('inv')">📄 Voorraad (CSV)</button><button class="b2" onclick="csvOut('log')">📄 Mixlog (CSV)</button><button class="b2" onclick="csvOut('rec')">📄 Recepten (CSV)</button><button class="b2" onclick="csvOut('steep')">📄 Steep (CSV)</button></div>
  <label>Importeren</label><input type="file" accept=".json" onchange="importBackup(event)">

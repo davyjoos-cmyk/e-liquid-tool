@@ -37,7 +37,7 @@ Open de app daarna één keer met internet, zodat hij zichzelf offline beschikba
 In de tab Etiket kun je een API-sleutel van Google AI Studio invullen. De sleutel wordt alleen in je telefoon bewaard. Gebruik bij voorkeur een sleutel met een laag budget of een beperking, en deel hem nooit. Zonder sleutel kun je ook gewoon de instructie kopiëren en in de Gemini-app plakken.
 
 ## Updaten
-Upload de gewijzigde bestanden (`index.html`, `style.css`, `app.js`) en verhoog de versie in `sw.js` (bijv. `v5.5.4` → `v5.5.5`). De app ververst zichzelf bij het volgende openen (soms pas de tweede keer). Upload altijd de hele map, zodat de bestanden bij elkaar passen.
+Upload de gewijzigde bestanden en verhoog de versie in `sw.js` (bijv. `v5.5.5` → `v5.5.6`). De app controleert bij het openen en bij terugkeren of er een nieuwe versie is en toont dan een balk "Vernieuwen". Upload altijd de hele map.
 
 ## Testen op je computer
 Open een terminal in deze map en start `python3 -m http.server 8000`, ga naar `http://localhost:8000`. Op je telefoon via het wifi-adres (http) werkt installeren niet: daar is https voor nodig.

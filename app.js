@@ -1741,4 +1741,18 @@ function exportBackup(){markBackup();outFile(`vape_lab_backup_${new Date().toISO
 function importBackup(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);undoPush('Backup geïmporteerd');if(Array.isArray(d.inventory))inventory=d.inventory;if(Array.isArray(d.steepBatches))steep=d.steepBatches;if(Array.isArray(d.savedRecipes))saved=d.savedRecipes;if(d.badges&&typeof d.badges==='object'){Object.assign(badgeSt,d.badges);store('vape_badges',badgeSt)}if(d.counters&&typeof d.counters==='object'){Object.assign(cnt,d.counters);store('vape_cnt',cnt)}if(Array.isArray(d.meas)){meas.length=0;meas.push(...d.meas);store('vape_meas',meas)}if(Array.isArray(d.devices)){devs=d.devices;store('vape_devs',devs);renderDev()}if(Array.isArray(d.bottles)){bottles=d.bottles;store('vape_bottles',bottles);renderBottle()}if(Array.isArray(d.liquids)){liquids=d.liquids;store('vape_liquids',liquids);renderLiquids();renderBlend()}if(Array.isArray(d.bases)){bases=d.bases;store('vape_bases',bases);renderBases()}if(d.prices){Object.assign(price,d.prices);store('vape_prices',price);initCfg()}if(Array.isArray(d.mixLog)){log=d.mixLog;store('vape_log',log);renderLog()}let rs=false;if(d.settings&&typeof d.settings==='object')rs=restoreSettings(d.settings);store('vape_saved_recipes',saved);renderInventory();renderSteep();renderSaved();renderFlavors();toast('✅ Backup geïmporteerd'+(rs?' · instellingen worden herladen':''));if(rs)setTimeout(()=>location.reload(),1200)}catch{toast('❌ Ongeldig JSON-bestand')}};r.readAsText(f)}
 
 renderFlavors();renderInventory();renderSteep();renderSaved();renderSuggestions();try{navigator.storage?.persist?.()}catch{}renderLiquids();renderBlend();renderBottle();renderBases();calcCorrection();initCfg();renderLog();checkBadges(true);drawRadar();renderMtl();renderCalcBottle();renderUse();
-if('serviceWorker' in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+/* PWA-updates: zoek bij start en bij terugkeren naar de app, toon een balk als er iets nieuws klaarstaat */
+let swReg=null,swReload=false;
+function updBar(){const b=$('bkBar');if(!b)return;b.innerHTML='<span style="flex:1">🔄 Nieuwe versie van de app beschikbaar.</span><button class="b1 sm" onclick="updApply()">Vernieuwen</button><button class="x" onclick="this.parentNode.style.display=\'none\'">✕</button>';b.style.display='flex'}
+function updApply(){swReload=true;if(swReg&&swReg.waiting)swReg.waiting.postMessage('skip');else location.reload()}
+async function updCheck(manual){if(!swReg){if(manual)toast('Updates werken alleen in de geïnstalleerde app');return}
+ try{await swReg.update();if(manual){setTimeout(()=>{if(!(swReg.waiting||swReg.installing))toast('✅ Je hebt de nieuwste versie')},1500)}}catch{if(manual)toast('Geen verbinding om te controleren')}}
+if('serviceWorker' in navigator&&location.protocol!=='file:'){
+ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{swReg=r;
+  if(r.waiting&&navigator.serviceWorker.controller)updBar();
+  r.addEventListener('updatefound',()=>{const w=r.installing;if(w)w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)updBar()})});
+  updCheck(false)}).catch(()=>{}));
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(swReload)location.reload()});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)updCheck(false)});
+ setInterval(()=>updCheck(false),60*60000)}
+
