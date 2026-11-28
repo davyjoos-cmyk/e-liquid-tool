@@ -4,7 +4,7 @@ const num=(id,d=0)=>{const v=parseFloat($(id).value);return isNaN(v)?d:v};
 const today=()=>new Date().toLocaleDateString('nl-BE');
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}};
 let chgT=0;const CHGK=['vape_inv_master','vape_steep_master','vape_saved_recipes','vape_log','vape_liquids','vape_bases','vape_bottles','vape_devs','vape_prices'];
-const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));if(CHGK.includes(k)&&Date.now()-chgT>60000){chgT=Date.now();localStorage.setItem('vape_chg',String((+localStorage.getItem('vape_chg')||0)+1))}}catch{}};
+let fullT=0;const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));if(CHGK.includes(k)&&Date.now()-chgT>60000){chgT=Date.now();localStorage.setItem('vape_chg',String((+localStorage.getItem('vape_chg')||0)+1))}}catch{if(Date.now()-fullT>8000){fullT=Date.now();try{toast('⚠️ Opslag vol: wijziging NIET bewaard. Maak een backup en ruim op.')}catch{}}}};
 let tt;const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)};
 const copy=async(t,m)=>{try{await navigator.clipboard.writeText(t);toast(m)}catch{toast('⚠️ Kopiëren niet mogelijk in deze omgeving')}};
 const D={NIC:1.1,FL:1.04,VG:1.26,PG:1.036},P={fl:.25};
@@ -25,7 +25,7 @@ function toggleTheme(){const d=document.documentElement,l=d.dataset.theme==='dar
 ['recipeName','targetMl','targetNic','targetVg','nicBaseMg','nicBaseVg'].forEach(id=>$(id).addEventListener('input',calculate));
 ['cMl','cNic','tNic','cRatio'].forEach(id=>$(id).addEventListener('input',calcCorrection));
 ['bgTheme','lblSize','lblW','lblH','lblMode','lblWarn','lblOwner','lblBatch','lblSteep','gMode','gArt'].forEach(id=>$(id).addEventListener('input',updateLabel));
-$('q').addEventListener('input',renderSaved);
+let qTm=0;$('q').addEventListener('input',()=>{clearTimeout(qTm);qTm=setTimeout(()=>{savedLim=50;renderSaved()},200)});
 $('mlChips').innerHTML=[10,30,60,100,120].map(v=>`<span class="chip" onclick="$('targetMl').value=${v};calculate()">${v} ml</span>`).join('');
 
 function setNicType(t){nicType=t;$('btn-fb').className=t==='freebase'?'fb':'';$('btn-salt').className=t==='salts'?'salt':'';calculate()}
@@ -80,10 +80,13 @@ function copySheet(){const c=calc();let t=`${$('recipeName').value}\n${c.ml}ml �
 
 const curRecipe=()=>({id:Date.now(),name:$('recipeName').value||'Mijn Recept',targetMl:num('targetMl',60),targetNic:num('targetNic',3),targetVg:num('targetVg',70),nicType,dev:recDev.id,watt:recDev.w,flavors:structuredClone(flavors),blend:structuredClone(blend)});
 const saveRecipe=()=>{const r={...curRecipe(),...(recMeta||{})};saved.push(r);store('vape_saved_recipes',saved);toast(`✅ "${r.name}" opgeslagen`);checkBadges()};
+let savedLim=50,invLim=100;
 function renderSaved(){renderRecent();
  const q=$('q').value.toLowerCase();$('savedCount').textContent=`${saved.length} recepten`;
  const list=saved.map((r,i)=>[r,i]).filter(([r])=>!q||(r.name+(r.desc||'')+r.flavors.map(f=>f.name).join()).toLowerCase().includes(q)).sort((a,b)=>(b[0].fav?1:0)-(a[0].fav?1:0));
- $('saved').innerHTML=list.map(([r,i])=>`<div class="it" style="flex-wrap:wrap"><div style="flex:1;min-width:150px"><b style="font-size:.86rem"><span style="cursor:pointer" onclick="fav(${i})">${r.fav?'⭐':'☆'}</span> ${esc(r.name)}</b><div class="sub">${r.targetVg}VG/${100-r.targetVg}PG · ${r.targetNic}mg · ${r.flavors.length} aroma's${(m=>m!=null?` · max ${m} ml`:'')(maxBatch(r.flavors))}</div>${devSub(r)}${recTagHTML(r,i)}${metaHTML(r,i)}</div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="b2 sm" onclick="scaleTog(${i})">⚖️</button><button class="b2 sm" onclick="tagEd=tagEd===${i}?-1:${i};renderSaved()">🏷️</button><button class="b2 sm" onclick="loadSaved(${i})">Laden</button><button class="b2 sm" onclick="dupSaved(${i})">⧉</button><button class="b2 sm" onclick="shareRecipe(${i})">📤</button><button class="x" onclick="delSaved(${i})">✕</button></div></div>${scEd===i?scalePanel(r,i):''}`).join('')||'<p class="note">Geen recepten gevonden.</p>';
+ $('savedCount').textContent=q?`${list.length} van ${saved.length} recepten`:`${saved.length} recepten`;
+ const more=list.length>savedLim?`<button class="b2" style="width:100%;margin-top:8px" onclick="savedLim+=50;renderSaved()">Toon meer (${list.length-savedLim} resterend)</button>`:'';
+ $('saved').innerHTML=list.slice(0,savedLim).map(([r,i])=>`<div class="it" style="flex-wrap:wrap"><div style="flex:1;min-width:150px"><b style="font-size:.86rem"><span style="cursor:pointer" onclick="fav(${i})">${r.fav?'⭐':'☆'}</span> ${esc(r.name)}</b><div class="sub">${r.targetVg}VG/${100-r.targetVg}PG · ${r.targetNic}mg · ${r.flavors.length} aroma's${(m=>m!=null?` · max ${m} ml`:'')(maxBatch(r.flavors))}</div>${devSub(r)}${recTagHTML(r,i)}${metaHTML(r,i)}</div><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="b2 sm" onclick="scaleTog(${i})">⚖️</button><button class="b2 sm" onclick="tagEd=tagEd===${i}?-1:${i};renderSaved()">🏷️</button><button class="b2 sm" onclick="loadSaved(${i})">Laden</button><button class="b2 sm" onclick="dupSaved(${i})">⧉</button><button class="b2 sm" onclick="shareRecipe(${i})">📤</button><button class="x" onclick="delSaved(${i})">✕</button></div></div>${scEd===i?scalePanel(r,i):''}`).join('')+more||'<p class="note">Geen recepten gevonden.</p>';
 }
 const sv=()=>{store('vape_saved_recipes',saved);renderSaved()};
 const fav=i=>{saved[i].fav=!saved[i].fav;sv()};
@@ -96,12 +99,15 @@ function deductInventory(ov){undoPush('Mix afgeboekt');
  flavors.forEach(f=>{const m=inventory.find(i=>i.name.toLowerCase()===f.name.toLowerCase()),need=ov?takeOv(ov,f.name):ml*(+f.pct||0)/100;if(!m)return;if(m.ml<need)miss.push(`${m.name} (${(need-m.ml).toFixed(1)} ml tekort)`);invTake(m,need);n++});
  log.unshift({t:Date.now(),ml:+ml.toFixed(1),cost:ov?lastCost*ov.total/Math.max(1,num('targetMl')):lastCost,r:curRecipe(),g:mode==='g'||labOpen});log.length=Math.min(log.length,500);store('vape_log',log);renderLog();addAutoSteep();addLiquidFromBatch();renderInventory();checkBadges();toast(miss.length?`⚠️ Tekort: ${miss.join(', ')}`:`📉 ${n} aroma('s) afgetrokken · steep gestart · liquid opgeslagen`);
 }
-function renderInventory(){renderInvF();if(cntMode){renderCount();store('vape_inv_master',inventory);return}
+function renderInventory(){invSearchInit();renderInvF();if(invFilter==='cat'){$('invCount').textContent='catalogus';$('inv').innerHTML=catListHTML();return}if(cntMode){renderCount();store('vape_inv_master',inventory);return}
  $('invCount').textContent=`${inventory.length} items`;
- $('inv').innerHTML=inventory.map((it,i)=>{if(!invOk(it))return'';
+ let invShown=0,invTot=0;
+ $('inv').innerHTML=inventory.map((it,i)=>{if(!invOk(it))return'';invTot++;if(++invShown>invLim&&i!==editIdx&&i!==detIdx&&i!==refI)return'';
   const tags=[kindTag(it),it.dil>0&&it.dil<100&&('verdund '+it.dil+'%'),it.rec&&`aanb. ${it.rec}%`,it.max&&`max ${it.max}%`,it.steep&&`steep ${it.steep}d`,it.base==='VG'&&'VG-basis',it.price&&it.size&&`€${(it.price/it.size).toFixed(2)}/ml`,it.fl&&it.fl.length>0&&`🍶 ${it.fl.length} flesje${it.fl.length>1?'s':''}: ${it.fl.map(b=>bf(b.ml)+'/'+b.size).join(' · ')} ml`,it.brand&&'🏷️ '+esc(it.brand),it.str&&`sterkte ${it.str}`,it.cmix&&'eigen smaakmix',it.note&&'📝 '+esc(it.note),ingrTag(it)].filter(Boolean).join(' · ');
   const fld=[['rec','Aanbev. %','0.5'],['max','Max %','0.5'],['steep','Steep (dgn)','1'],['price','Prijs (€)','0.01'],['size','Flesje (ml)','1'],['min','Herbestel bij (ml)','1']].filter(([k])=>!(it.fl&&it.fl.length&&(k==='price'||k==='size'))).map(([k,l,st])=>`<div class="fg"><label>${l}</label><input type="number" min="0" step="${st}" value="${it[k]||''}" onchange="setInvF(${i},'${k}',this.value)"></div>`).join('');
   return`<div class="it" id="inv-${i}" style="flex-wrap:wrap"><div><b style="font-size:.86rem">${esc(it.name)}</b><div class="sub">${tags||'Geen richtlijnen ingesteld'}</div>${it.ml<=0?'<span class="bg bw">❌ Op</span>':it.ml<=thr(it)?'<span class="bg bw">⚠️ Laag (≤'+thr(it)+' ml)</span>':it.ml<=15?'<span class="bg ba">Bijna op</span>':''}</div><div style="display:flex;align-items:center;gap:6px"><input type="number" value="${it.ml}" ${it.fl&&it.fl.length?'readonly title="Bepaald door je flesjes"':''} onchange="updInv(${i},this.value)" style="width:70px;text-align:center"><span class="sub">ml</span><button class="b2 sm" onclick="refI=refI===${i}?-1:${i};renderInventory()">📖</button><button class="b2 sm" onclick="editIdx=editIdx===${i}?-1:${i};renderInventory()">✎</button><button class="b2 sm" title="Alle gegevens" onclick="detIdx=detIdx===${i}?-1:${i};renderInventory()">🗂️</button><button class="x" onclick="rmInv(${i})">✕</button></div>${editIdx===i?`<div class="g3" style="flex-basis:100%;margin-top:6px">${fld}<div class="fg"><label>Basis</label><select onchange="setInvF(${i},'base',this.value)"><option value="PG"${it.base==='VG'?'':' selected'}>PG</option><option value="VG"${it.base==='VG'?' selected':''}>VG</option></select></div><div class="fg"><label>Categorie</label><select onchange="setInvF(${i},'cat',this.value)"><option value="">Automatisch</option>${CATS.map(([k,n])=>`<option value="${k}"${it.cat===k?' selected':''}>${n}</option>`).join('')}</select></div></div>${invMixHTML(it,i)}${invFlHTML(it,i)}`:''}${detIdx===i?detPanel(it,i):''}${refI===i?refPanel(it,i):''}</div>`}).join('')||(inventory.length?'<p class="note">✅ Geen aroma\'s in deze categorie.</p>':'');
+ if(invQ&&akey(invQ).length>=2&&invFilter==='all'){const c=catRows(invQ,'',8);if(c.n)$('inv').insertAdjacentHTML('beforeend','<div class="sub" style="margin:10px 0 6px">📚 Uit de catalogus ('+c.n+(c.n>8?', eerste 8':'')+')</div>'+c.html+(c.n>8?'<button class="b2 sm" onclick="setInvFilter(\'cat\')">Alles in catalogus bekijken</button>':''))}
+ if(invTot>invLim)$('inv').insertAdjacentHTML('beforeend',`<button class="b2" style="width:100%;margin-top:8px" onclick="invLim+=100;renderInventory()">Toon meer (${invTot-invLim} resterend)</button>`);
  store('vape_inv_master',inventory);
 }
 const updInv=(i,v)=>{undoPush('Voorraad aangepast',1);inventory[i].ml=parseFloat(v)||0;renderInventory()};
@@ -875,11 +881,11 @@ document.addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/
 
 /* ===== Voorraadfilter + Wat kan ik nu mixen? ===== */
 let invFilter='all',cookF='all',brandF='',refI=-1,cntMode=false,cntStep=1,stGr=-1,tsEd=-1,devs=load('vape_devs',[]),recDev={id:'',w:0},ncF=3,twRes=null,undoSt=[];
-const invOk=it=>(!brandF||brandOf(it)===brandF)&&(!invKind||(invKind==='add'?it.kind==='add':it.kind!=='add'))&&(invFilter==='all'||(invFilter==='out'?it.ml<=0:invFilter==='min'?it.ml<=thr(it):invFilter==='low5'?it.ml<=5:invFilter==='low15'?it.ml<=15:it.ml>15));
+const invOk=it=>(!brandF||brandOf(it)===brandF)&&(!invQ||akey(it.name).includes(akey(invQ)))&&(!invKind||(invKind==='add'?it.kind==='add':it.kind!=='add'))&&(invFilter==='all'||(invFilter==='out'?it.ml<=0:invFilter==='min'?it.ml<=thr(it):invFilter==='low5'?it.ml<=5:invFilter==='low15'?it.ml<=15:it.ml>15));
 function setInvFilter(v){invFilter=v;renderInventory()}
 function renderInvF(){
  const el=$('invF');if(!el)return;const n=f=>inventory.filter(it=>f==='all'||(f==='out'?it.ml<=0:f==='min'?it.ml<=thr(it):f==='low5'?it.ml<=5:f==='low15'?it.ml<=15:it.ml>15)).length;
- el.innerHTML=[['all','Alles'],['out','❌ Op'],['min','🔔 Eigen drempel'],['low5','🛒 ≤5 ml'],['low15','🟡 ≤15 ml'],['ok','✅ Op voorraad']].map(([k,l])=>`<span class="chip${invFilter===k?' on':''}" onclick="setInvFilter('${k}')">${l} (${n(k)})</span>`).join('')+brandSel()+extraChips();renderInvVal();dlFill();catRender()}
+ el.innerHTML=[['all','Alles'],['out','❌ Op'],['min','🔔 Eigen drempel'],['low5','🛒 ≤5 ml'],['low15','🟡 ≤15 ml'],['ok','✅ Op voorraad']].map(([k,l])=>`<span class="chip${invFilter===k?' on':''}" onclick="setInvFilter('${k}')">${l} (${n(k)})</span>`).join('')+`<span class="chip${invFilter==='cat'?' on':''}" onclick="setInvFilter('cat')">📚 Catalogus (${catData().length})</span>`+brandSel()+extraChips();renderInvVal();dlFill();catRender()}
 function cookRows(){
  return saved.map((r,i)=>({r,src:'rec',i})).concat(presets.map((r,i)=>({r,src:'pre',i}))).map(({r,src,i})=>{
   const ml=r.targetMl||60,miss=[];let mx=Infinity;
@@ -1214,7 +1220,7 @@ async function scanStart(){
 function scanStop(){clearTimeout(scanTimer);if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null}const v=$('scanVid');if(v)v.srcObject=null}
 function scanClose(){scanStop();$('scanOv').style.display='none';scanSt=null}
 function scanManualGo(){const c=$('scanManual').value.trim();if(c)scanDone(c)}
-function scanShow(i){invFilter='all';brandF='';cntMode=false;refI=i;switchTab('inv');renderInventory();setTimeout(()=>{const e=$('inv-'+i);if(e)e.scrollIntoView({block:'center',behavior:'smooth'})},150);toast('📖 '+inventory[i].name)}
+function scanShow(i){invLim=1e9;invFilter='all';brandF='';cntMode=false;refI=i;switchTab('inv');renderInventory();setTimeout(()=>{const e=$('inv-'+i);if(e)e.scrollIntoView({block:'center',behavior:'smooth'})},150);toast('📖 '+inventory[i].name)}
 function scanDone(code){
  scanStop();code=String(code).trim();if(!scanSt||!code)return;const idx=inventory.findIndex(x=>x.barcode===code);
  if(scanSt.mode==='link'){const i=scanSt.idx;if(idx>=0&&idx!==i){toast('Code verplaatst van '+inventory[idx].name);delete inventory[idx].barcode}if(inventory[i])inventory[i].barcode=code;scanClose();renderInventory();toast('✅ Barcode gekoppeld');return}
@@ -1270,6 +1276,7 @@ async function persistAsk(manual){let ok=null;try{if(navigator.storage&&navigato
  stRefresh(ok,manual)}
 async function stRefresh(ok,manual){const e=$('stSt');if(!e)return;let txt='';try{if(ok==null&&navigator.storage&&navigator.storage.persisted)ok=await navigator.storage.persisted();
  if(navigator.storage&&navigator.storage.estimate){const q=await navigator.storage.estimate();txt=' · '+(q.usage/1048576).toFixed(1)+' MB in gebruik'}}catch{}
+ try{let ch=0;for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);ch+=k.length+(localStorage.getItem(k)||'').length}const pc=Math.round(ch/5242880*100);txt+=' · app-gegevens ±'+(ch/1048576).toFixed(1)+' MB (~'+pc+'% van de ruimte)'+(pc>=70?' ⚠️ bijna vol, maak een backup':'')}catch{}
  e.innerHTML=ok===true?'🔒 Opslag beveiligd: de browser wist je gegevens niet zomaar'+txt:ok===false?'⚠️ Opslag niet beveiligd: de browser mag je gegevens wissen bij ruimtegebrek'+txt+(manual?'. Je browser heeft dit nu geweigerd; installeer de app of gebruik hem vaker, dan lukt het vaak wel.':''):'ℹ️ Je browser kan dit niet aangeven'+txt}
 setTimeout(()=>persistAsk(false),3000);
 /* ===== v5.2 ===== */
@@ -1530,7 +1537,7 @@ function impApply(mode){
  imp=null;$('impIn').value='';$('impOut').innerHTML=''}
 
 /* --- catalogus --- */
-function catRender(){
+function catRender(){if(!$('catBox'))return;
  const el=$('catBox');if(!el)return;const L=catData(),q=akey(catQ),vs=[...new Set(L.map(e=>e.v))];
  const have=new Set(inventory.map(i=>{const s=vSplit(i.name);return s.v+'|'+akey(s.n)}));
  const f=L.map((e,i)=>({e,i})).filter(({e})=>(!catV||e.v===catV)&&(!q||akey(e.d).includes(q)));
@@ -1539,6 +1546,16 @@ function catRender(){
 function catAdd(i){const e=catData()[i];if(!e)return;if(invFind2(e.v==='X'?'':e.v,e.k)>=0)return toast('Staat al in je lijst');undoPush('Aroma toegevoegd');inventory.push({id:Date.now(),name:e.d,ml:0,size:0,price:0,wish:true,cat:e.c,...(e.a?{kind:'add',addType:e.a}:{})});store('vape_inv_master',inventory);renderInventory();renderFlavors();catRender();toast('➕ '+e.d)}
 dlFill();
 
+
+/* ===== v5.5.6: aroma's en catalogus in één lijst ===== */
+var invQ='',catLim=60,invQTm=0;
+function catRows(q,v,lim){const L=catData(),k=akey(q),have=new Set(inventory.map(i=>{const s=vSplit(i.name);return s.v+'|'+akey(s.n)}));
+ const f=[];for(let i=0;i<L.length;i++){const e=L[i];if(have.has(e.v+'|'+e.k))continue;if(v&&e.v!==v)continue;if(k&&!akey(e.d).includes(k))continue;f.push([e,i])}
+ return{n:f.length,html:f.slice(0,lim).map(([e,i])=>`<div class="it" style="opacity:.78"><div style="min-width:0"><b style="font-size:.84rem">${esc(e.d)}</b><div class="sub">📚 catalogus · ${(CATS.find(c=>c[0]===e.c)||[0,e.c,''])[2]} ${esc(CN[e.c]||e.c)}${e.a?' · 🧂 '+ADDT[e.a]:''}</div></div><button class="b2 sm" onclick="catAdd(${i})">➕ Wishlist</button></div>`).join('')}}
+function catListHTML(){const L=catData(),vs=[...new Set(L.map(e=>e.v))],r=catRows(invQ,catV,catLim);
+ return`<div class="chips" style="margin-bottom:8px">${['',...vs].map(v=>`<span class="chip${catV===v?' on':''}" onclick="catV='${v}';catLim=60;renderInventory()">${v?VD[v]:'Alle'}</span>`).join('')}</div><div class="sub" style="margin:6px 0">📚 ${r.n} catalogus-aroma's die nog niet in je lijst staan${r.n>catLim?' (eerste '+catLim+')':''}</div>`+r.html+(r.n>catLim?`<button class="b2" style="width:100%;margin-top:8px" onclick="catLim+=60;renderInventory()">Toon meer (${r.n-catLim} resterend)</button>`:'')}
+function invSearchInit(){if($('invQ'))return;$('invF').insertAdjacentHTML('afterend','<input id="invQ" placeholder="🔍 Zoek in je aroma\'s en de catalogus…" autocomplete="off" style="margin-bottom:8px">');
+ $('invQ').addEventListener('input',e=>{clearTimeout(invQTm);invQTm=setTimeout(()=>{invQ=e.target.value;invLim=100;catLim=60;renderInventory()},200)})}
 /* ===== v5.4: tabbladen, short-/longfills, import-metadata ===== */
 var TAB_ALIAS={steep:['liq','steep'],fles:['liq','fles'],label:['saved','label'],correct:['calc','correct'],backup:['dash','backup']},liqSecCur='liq',recMeta=null,metaOpen=-1,sfKind='short';
 function liqSec(sec,noRender){

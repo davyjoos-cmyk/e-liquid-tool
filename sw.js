@@ -1,4 +1,4 @@
-const V='eliquid-lab-v5.5.5';
+const V='eliquid-lab-v5.6.0';
 const ASSETS=['./','./index.html','./style.css','./app.js','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>Promise.all(ASSETS.map(a=>c.add(new Request(a,{cache:'reload'}))))))});
 self.addEventListener('message',e=>{if(e.data==='skip')self.skipWaiting()});
